@@ -49,12 +49,6 @@ cd frontend
 npm install
 npm run dev
 ```
-
-### Access the App
-- **Frontend**: http://localhost:5173
-- **API Docs**: http://localhost:8000/docs
-- **API Health**: http://localhost:8000/api/health
-
 ---
 
 ## Demo Flow (3-minute walkthrough)
