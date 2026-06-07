@@ -77,8 +77,8 @@ async def check_conflicts(new_rules: list[dict], db: Session) -> list[dict]:
 
     # Use Claude for semantic comparison
     try:
-        import anthropic
-        client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+        from google import genai
+        client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
         existing_json = json.dumps([{
             "rule_id": r.rule_id,
@@ -108,15 +108,16 @@ For each conflict found, provide:
 Respond with valid JSON: {{"conflicts": [...]}}
 If no conflicts, respond: {{"conflicts": []}}"""
 
-        message = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=2048,
-            messages=[{"role": "user", "content": prompt}]
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
         )
 
-        response_text = message.content[0].text
+        response_text = response.text
         if "```json" in response_text:
             response_text = response_text.split("```json")[1].split("```")[0]
+        elif "```" in response_text:
+            response_text = response_text.split("```")[1].split("```")[0]
 
         result = json.loads(response_text.strip())
         return result.get("conflicts", [])

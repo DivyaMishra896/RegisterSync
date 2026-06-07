@@ -10,6 +10,7 @@ export default function UploadPage() {
   const [circularId, setCircularId] = useState(null);
   const [extractionData, setExtractionData] = useState(null);
   const [extracting, setExtracting] = useState(false);
+  const [error, setError] = useState(null);
   const [step, setStep] = useState('upload'); // upload, extract, done
 
   const handleUploadComplete = (data) => {
@@ -22,11 +23,13 @@ export default function UploadPage() {
     setExtracting(true);
 
     try {
+      setError(null);
       const response = await triggerExtraction(circularId);
       setExtractionData(response.data);
       setStep('done');
     } catch (err) {
       console.error('Extraction failed:', err);
+      setError(err.response?.data?.detail || err.message || 'Extraction failed. Please try again.');
     } finally {
       setExtracting(false);
     }
@@ -75,6 +78,13 @@ export default function UploadPage() {
               Ready to extract rules using AI. This will analyze the document, extract compliance requirements,
               generate action items, and check for conflicts with existing rules.
             </div>
+            
+            {error && (
+              <div style={{ padding: '12px', background: 'var(--status-failed-dim)', color: 'var(--status-failed)', borderRadius: '8px', marginBottom: '20px', fontSize: '14px' }}>
+                {error}
+              </div>
+            )}
+            
             <button className="btn btn-primary btn-lg" onClick={handleExtract}>
               <Sparkles size={18} />
               Extract Rules with AI
