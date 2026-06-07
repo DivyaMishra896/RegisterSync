@@ -1,0 +1,30 @@
+[
+    {
+        "task_ref": "MAP-001",
+        "action": "VAPT scan completed for core banking platform (CBS v4.2)",
+        "timestamp": "2026-06-05T14:30:00Z",
+        "evidence": "/reports/vapt_q2_2026_cbs.pdf",
+        "status": "completed",
+        "source_log": "IT Security SIEM",
+        "executor": "Cybersecurity Team"
+    },
+    {
+        "task_ref": "MAP-004",
+        "action": "Cyber incident reporting SOP updated and CSOC notification channels configured",
+        "timestamp": "2026-06-04T09:15:00Z",
+        "evidence": "/reports/csoc_setup_report_2026.pdf",
+        "status": "completed",
+        "source_log": "IT Security Operations",
+        "executor": "CSOC Team Lead"
+    },
+    {
+        "task_ref": "MAP-008",
+        "action": "Data migration from Singapore DC initiated — 40% complete",
+        "timestamp": "2026-06-06T18:00:00Z",
+        "evidence": "/reports/data_migration_progress.xlsx",
+        "status": "partial",
+        "source_log": "Infrastructure Ops",
+        "notes": "Migration of payment credentials complete, customer PII migration in progress. ETA: 45 days.",
+        "executor": "Cloud Infrastructure Team"
+    }
+]
