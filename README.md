@@ -1,10 +1,10 @@
-# 🛡️ Suraksha — Regulatory Compliance Automation
+# Suraksha — Regulatory Compliance Automation
 
 **AI-powered compliance automation platform for Indian banking.** Upload RBI/SEBI circulars, extract rules with AI, generate measurable action points, route tasks to departments, and auto-verify compliance — all from a single dashboard.
 
 ---
 
-## ✨ Key Features
+## Key Features
 
 | Module | Description |
 |--------|-------------|
@@ -17,7 +17,7 @@
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Python 3.11+ 
@@ -57,7 +57,7 @@ npm run dev
 
 ---
 
-## 📋 Demo Flow (3-minute walkthrough)
+## Demo Flow (3-minute walkthrough)
 
 1. **Upload** (30s) — Drag the included `mock_rbi_circular.pdf` from `/backend/samples/` onto the upload screen
 2. **AI Extract** (45s) — Click "Extract Rules with AI" to see the LLM analyzing the circular and producing structured MAPs in real time
@@ -67,7 +67,7 @@ npm run dev
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 PDF Upload -> Text Extraction (PyMuPDF) -> AI Analysis (Claude API)
@@ -87,7 +87,7 @@ PDF Upload -> Text Extraction (PyMuPDF) -> AI Analysis (Claude API)
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 Suraksha/
@@ -118,7 +118,7 @@ Suraksha/
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 Copy `.env.example` to `.env` in the `backend/` directory:
 
@@ -136,7 +136,7 @@ FRONTEND_URL=http://localhost:5173
 
 ---
 
-## 🔑 API Endpoints
+## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -152,7 +152,7 @@ Full interactive API docs available at `/docs` (Swagger UI).
 
 ---
 
-## 🎯 What Makes Suraksha Different
+## What Makes Suraksha Different
 
 **The Verification Agent** is the standout differentiator. While other compliance tools stop at task creation, Suraksha goes further:
 - Reads actual system logs (mock in prototype, real SIEM/GRC integration in production)
@@ -163,6 +163,6 @@ Full interactive API docs available at `/docs` (Swagger UI).
 
 ---
 
-## 📄 License
+## License
 
 MIT License - Built for Hackathon Prototype
