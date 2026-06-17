@@ -3,14 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { Upload, Sparkles, ArrowRight } from 'lucide-react';
 import UploadZone from '../components/UploadZone';
 import ExtractionView from '../components/ExtractionView';
-import { triggerExtraction } from '../api/client';
 
 export default function UploadPage() {
   const navigate = useNavigate();
   const [circularId, setCircularId] = useState(null);
-  const [extractionData, setExtractionData] = useState(null);
   const [extracting, setExtracting] = useState(false);
-  const [error, setError] = useState(null);
   const [step, setStep] = useState('upload'); // upload, extract, done
 
   const handleUploadComplete = (data) => {
@@ -18,21 +15,14 @@ export default function UploadPage() {
     setStep('extract');
   };
 
-  const handleExtract = async () => {
+  const handleExtract = () => {
     if (!circularId) return;
     setExtracting(true);
+  };
 
-    try {
-      setError(null);
-      const response = await triggerExtraction(circularId);
-      setExtractionData(response.data);
-      setStep('done');
-    } catch (err) {
-      console.error('Extraction failed:', err);
-      setError(err.response?.data?.detail || err.message || 'Extraction failed. Please try again.');
-    } finally {
-      setExtracting(false);
-    }
+  const handleExtractionComplete = () => {
+    setStep('done');
+    setExtracting(false);
   };
 
   return (
@@ -67,23 +57,17 @@ export default function UploadPage() {
           <UploadZone onUploadComplete={handleUploadComplete} />
         )}
 
-        {/* Extract Step */}
-        {step === 'extract' && !extracting && !extractionData && (
+        {/* Extract Step Start */}
+        {step === 'extract' && !extracting && (
           <div className="card" style={{ textAlign: 'center', padding: '50px' }}>
             <Sparkles size={48} style={{ color: 'var(--accent-purple)', margin: '0 auto 16px', display: 'block' }} />
             <div style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px' }}>
               PDF uploaded successfully!
             </div>
             <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
-              Ready to extract rules using AI. This will analyze the document, extract compliance requirements,
-              generate action items, and check for conflicts with existing rules.
+              Ready to extract rules using AI. Watch the Multi-Agent system analyze the document, 
+              extract compliance requirements, and check for conflicts in real-time.
             </div>
-            
-            {error && (
-              <div style={{ padding: '12px', background: 'var(--status-failed-dim)', color: 'var(--status-failed)', borderRadius: '8px', marginBottom: '20px', fontSize: '14px' }}>
-                {error}
-              </div>
-            )}
             
             <button className="btn btn-primary btn-lg" onClick={handleExtract}>
               <Sparkles size={18} />
@@ -92,9 +76,13 @@ export default function UploadPage() {
           </div>
         )}
 
-        {/* Extracting / Results */}
-        {(extracting || extractionData) && (
-          <ExtractionView extractionData={extractionData} loading={extracting} />
+        {/* Extraction View (Streaming & Results) */}
+        {(extracting || step === 'done') && circularId && (
+          <ExtractionView 
+            circularId={circularId} 
+            isStreaming={extracting}
+            onComplete={handleExtractionComplete} 
+          />
         )}
 
         {/* Go to Dashboard */}

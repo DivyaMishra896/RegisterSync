@@ -9,9 +9,9 @@
 | Module | Description |
 |--------|-------------|
 | **PDF Ingestion** | Upload RBI/SEBI circular PDFs with drag-and-drop. Automatic text extraction and chunking. |
-| **AI Rule Extraction** | Claude API (or mock) extracts structured rules with priorities, deadlines, and department assignments. |
+| **AI Rule Extraction** | Multi-Agent AI (powered locally by Ollama, e.g. deepseek-r1:1.5b) extracts structured rules with priorities, deadlines, and department assignments. |
 | **MAP Generator** | Converts rules into Measurable Action Points (MAPs) with auto-routing to IT Security, Risk Management, or Operations. |
-| **Conflict Checker** | Detects contradictions between new and existing regulations (e.g., "2026 circular contradicts 2021 data localization policy"). |
+| **Conflict Checker** | Agentic detection of contradictions between new and existing regulations (e.g., "2026 circular contradicts 2021 data localization policy"). |
 | **Verification Agent** | Reads system logs to auto-verify task completion. Flips status from Pending to Verified/Failed/Partially Done with audit trail. |
 | **Impact Predictor** | Visual charts showing estimated effort by department and compliance status breakdown. |
 

@@ -90,6 +90,34 @@ async def get_task_stats(db: Session = Depends(get_db)):
             dept = task.department or "Unassigned"
             effort_by_dept[dept] = effort_by_dept.get(dept, 0) + effort
 
+    # Compliance risk score
+    from models.rule import ExtractedRule
+    unresolved_conflicts = db.query(ExtractedRule).filter(ExtractedRule.has_conflict == True).count()
+    
+    risk_score = 100
+    for task in all_tasks:
+        if task.status == "Failed":
+            risk_score -= 15
+        elif task.status == "Pending":
+            if task.priority == "Critical":
+                risk_score -= 10
+            elif task.priority == "High":
+                risk_score -= 5
+            elif task.priority == "Medium":
+                risk_score -= 2
+                
+    risk_score -= (unresolved_conflicts * 10)
+    risk_score = max(0, min(100, risk_score)) # Clamp between 0-100
+    
+    # Classify risk
+    risk_level = "LOW RISK"
+    if risk_score < 50:
+        risk_level = "CRITICAL RISK"
+    elif risk_score < 75:
+        risk_level = "HIGH RISK"
+    elif risk_score < 90:
+        risk_level = "MEDIUM RISK"
+
     return {
         "total": len(all_tasks),
         "by_status": by_status,
@@ -97,7 +125,10 @@ async def get_task_stats(db: Session = Depends(get_db)):
         "by_priority": by_priority,
         "compliance_rate": compliance_rate,
         "total_effort_days": total_effort,
-        "effort_by_department": effort_by_dept
+        "effort_by_department": effort_by_dept,
+        "risk_score": risk_score,
+        "risk_level": risk_level,
+        "unresolved_conflicts": unresolved_conflicts
     }
 
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, RefreshCw, TrendingUp, Clock, CheckCircle, XCircle, Shield } from 'lucide-react';
+import { LayoutDashboard, RefreshCw, TrendingUp, Clock, CheckCircle, XCircle, Shield, AlertTriangle } from 'lucide-react';
 import TaskBoard from '../components/TaskBoard';
 import VerificationPanel from '../components/VerificationPanel';
 import ImpactPredictor from '../components/ImpactPredictor';
@@ -161,18 +161,26 @@ export default function DashboardPage() {
             <div className="stat-label">Pending</div>
           </div>
 
-          <div className="stat-card-lg">
-            <div className="stat-icon" style={{ background: 'var(--accent-cyan-dim)', color: 'var(--accent-cyan)' }}>
-              <Shield size={18} />
+          <div className="stat-card-lg" style={{ background: stats?.risk_level?.includes('CRITICAL') || stats?.risk_level?.includes('HIGH') ? 'rgba(248, 113, 113, 0.05)' : 'var(--bg-secondary)' }}>
+            <div className="stat-icon" style={{ 
+              background: stats?.risk_score < 75 ? 'var(--accent-red-dim)' : 'var(--accent-emerald-dim)', 
+              color: stats?.risk_score < 75 ? 'var(--accent-red)' : 'var(--accent-emerald)' 
+            }}>
+              <AlertTriangle size={18} />
             </div>
             <div className="gauge-container" style={{ padding: '0' }}>
-              <div className="stat-value" style={{ fontSize: '28px' }}>
+              <div className="stat-value" style={{ 
+                fontSize: '28px',
+                color: stats?.risk_score < 75 ? 'var(--accent-red)' : 'var(--accent-emerald)'
+              }}>
                 <span className="gauge-value" style={{ fontSize: '28px' }}>
-                  {stats?.compliance_rate || 0}%
+                  {stats?.risk_score || 0}/100
                 </span>
               </div>
             </div>
-            <div className="stat-label">Compliance Rate</div>
+            <div className="stat-label">
+              {stats?.risk_level || 'Calculating...'}
+            </div>
           </div>
         </div>
 

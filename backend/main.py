@@ -65,4 +65,4 @@ async def root():
 @app.get("/api/health")
 async def health():
     """Health check for monitoring."""
-    return {"status": "healthy"}
+    return {"status": "healthy", "llm_mode": settings.LLM_MODE}

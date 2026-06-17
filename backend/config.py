@@ -1,6 +1,7 @@
 """
 Suraksha — Application Configuration
 Loads settings from .env file with sensible defaults.
+Supports Ollama (local LLM) with swappable models.
 """
 
 import os
@@ -15,13 +16,14 @@ load_dotenv(dotenv_path=env_path)
 class Settings:
     """Application settings loaded from environment variables."""
 
-    # API Keys
-    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
-
-    # LLM Mode: "mock" or "live"
+    # LLM Mode: "ollama" (local AI) or "mock" (regex fallback, no AI needed)
     LLM_MODE: str = os.getenv("LLM_MODE", "mock")
 
-    # Database
+    # Ollama Configuration — swap models by changing OLLAMA_MODEL
+    OLLAMA_URL: str = os.getenv("OLLAMA_URL", "http://localhost:11434")
+    OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "deepseek-r1:1.5b")
+
+    # Database (SQLite for offline use)
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./suraksha.db")
 
     # CORS

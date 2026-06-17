@@ -1,7 +1,23 @@
+import { useState, useEffect } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { Upload, LayoutDashboard, FileText, Shield, Activity } from 'lucide-react';
+import { healthCheck } from '../api/client';
 
 export default function Layout() {
+  const [llmMode, setLlmMode] = useState('mock');
+
+  useEffect(() => {
+    const fetchHealth = async () => {
+      try {
+        const res = await healthCheck();
+        if (res.data.llm_mode) setLlmMode(res.data.llm_mode);
+      } catch (err) {
+        console.error("Failed to fetch health check", err);
+      }
+    };
+    fetchHealth();
+  }, []);
+
   return (
     <div className="app-layout">
       {/* Sidebar */}
@@ -32,9 +48,9 @@ export default function Layout() {
         </nav>
 
         <div className="sidebar-footer">
-          <div className="sidebar-footer-badge">
-            <span className="sidebar-footer-dot"></span>
-            Mock Mode Active
+          <div className="sidebar-footer-badge" style={{ textTransform: 'capitalize' }}>
+            <span className="sidebar-footer-dot" style={{ background: llmMode === 'ollama' ? 'var(--accent-purple)' : 'var(--accent-amber)' }}></span>
+            {llmMode === 'ollama' ? 'Agentic Mode Active' : 'Mock Mode Active'}
           </div>
         </div>
       </aside>

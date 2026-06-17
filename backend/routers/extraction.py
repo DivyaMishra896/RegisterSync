@@ -1,110 +1,134 @@
 """
 Suraksha — Extraction Router
-Triggers LLM rule extraction and returns results.
+Triggers LLM rule extraction and returns results. Supports SSE streaming.
 """
 
 import json
 from datetime import datetime, date
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sse_starlette.sse import EventSourceResponse
 
-from database import get_db
+from database import get_db, SessionLocal
 from models.circular import Circular
 from models.rule import ExtractedRule
 from models.task import MAPTask
-from services.llm_extractor import extract_rules_from_text, validate_extraction
 from services.pdf_parser import chunk_text
 from services.map_generator import generate_maps_from_rules
-from services.conflict_checker import check_conflicts, apply_conflict_flags
+from services.agents.orchestrator import OrchestratorAgent
 
 router = APIRouter(prefix="/api/extract", tags=["Extraction"])
 
-
-@router.post("/{circular_id}")
-async def extract_rules(circular_id: int, db: Session = Depends(get_db)):
+@router.get("/{circular_id}/stream")
+async def extract_rules_stream(circular_id: int):
     """
-    Trigger LLM extraction pipeline for a circular.
-    Extracts rules, generates MAPs, checks conflicts.
+    Trigger LLM extraction pipeline for a circular and stream the reasoning via SSE.
     """
-    circular = db.query(Circular).filter(Circular.id == circular_id).first()
-    if not circular:
-        raise HTTPException(status_code=404, detail="Circular not found")
+    async def event_generator():
+        db = SessionLocal()
+        try:
+            circular = db.query(Circular).filter(Circular.id == circular_id).first()
+            if not circular:
+                yield {"event": "error", "data": "Circular not found"}
+                return
 
-    if not circular.raw_text:
-        raise HTTPException(status_code=400, detail="Circular has no extracted text")
+            if not circular.raw_text:
+                yield {"event": "error", "data": "Circular has no extracted text"}
+                return
 
-    # Update status
-    circular.status = "extracting"
-    db.commit()
+            circular.status = "extracting"
+            db.commit()
 
-    try:
-        # Step 1: Chunk text
-        chunks = chunk_text(circular.raw_text)
+            # 1. Chunk text
+            chunks = chunk_text(circular.raw_text)
 
-        # Step 2: Extract rules via LLM
-        extraction_result = await extract_rules_from_text(chunks, circular_id)
+            # 2. Get existing rules for conflict check
+            existing_rules_db = db.query(ExtractedRule).all()
+            existing_rules = [
+                {"rule_id": r.rule_id, "title": r.title, "description": r.description} 
+                for r in existing_rules_db
+            ]
 
-        # Step 3: Validate
-        is_valid, message = validate_extraction(extraction_result)
-        if not is_valid:
-            raise HTTPException(status_code=422, detail=f"Invalid extraction: {message}")
+            # 3. Run Orchestrator Pipeline
+            orchestrator = OrchestratorAgent()
+            final_data = None
 
-        # Step 4: Save rules to DB
-        saved_rules = []
-        for rule_data in extraction_result["rules"]:
-            deadline = None
-            if rule_data.get("deadline"):
-                try:
-                    deadline = date.fromisoformat(rule_data["deadline"])
-                except (ValueError, TypeError):
-                    deadline = None
+            async for step in orchestrator.run_extraction_pipeline(chunks, circular_id, existing_rules):
+                if step["type"] == "thought":
+                    yield {
+                        "event": "thought",
+                        "data": json.dumps({"agent": step["agent"], "thought": step["thought"]})
+                    }
+                elif step["type"] == "final_result":
+                    final_data = step["data"]
 
-            rule = ExtractedRule(
-                circular_id=circular_id,
-                rule_id=rule_data["rule_id"],
-                title=rule_data["title"],
-                description=rule_data["description"],
-                affected_departments=json.dumps(rule_data.get("affected_departments", [])),
-                deadline=deadline,
-                priority=rule_data.get("priority", "Medium"),
-                estimated_effort_days=rule_data.get("estimated_effort_days", 7),
-            )
-            db.add(rule)
-            saved_rules.append(rule)
+            # 4. Save results to DB
+            rules_data = final_data.get("rules", [])
+            conflicts_data = final_data.get("conflicts", [])
 
-        db.commit()
-        for rule in saved_rules:
-            db.refresh(rule)
+            saved_rules = []
+            for rule_data in rules_data:
+                deadline = None
+                if rule_data.get("deadline"):
+                    try:
+                        deadline = date.fromisoformat(rule_data["deadline"])
+                    except (ValueError, TypeError):
+                        deadline = None
 
-        # Step 5: Check conflicts
-        conflicts = await check_conflicts(extraction_result["rules"], db)
-        if conflicts:
-            apply_conflict_flags(db, saved_rules, conflicts)
+                rule = ExtractedRule(
+                    circular_id=circular_id,
+                    rule_id=rule_data.get("rule_id", "Unknown"),
+                    title=rule_data.get("title", "Unknown"),
+                    description=rule_data.get("description", ""),
+                    affected_departments=json.dumps(rule_data.get("affected_departments", [])),
+                    deadline=deadline,
+                    priority=rule_data.get("priority", "Medium"),
+                    estimated_effort_days=rule_data.get("estimated_effort_days", 7),
+                )
+                db.add(rule)
+                saved_rules.append(rule)
 
-        # Step 6: Generate MAP tasks
-        tasks = generate_maps_from_rules(db, circular_id, saved_rules)
+            db.commit()
+            for rule in saved_rules:
+                db.refresh(rule)
 
-        # Update circular status
-        circular.status = "processed"
-        db.commit()
+            # Apply conflict flags
+            if conflicts_data:
+                conflict_map = {}
+                for conflict in conflicts_data:
+                    rule_id = conflict.get("new_rule_id")
+                    if rule_id not in conflict_map:
+                        conflict_map[rule_id] = []
+                    conflict_map[rule_id].append(conflict)
 
-        return {
-            "message": "Extraction complete",
-            "circular_id": circular_id,
-            "rules_extracted": len(saved_rules),
-            "tasks_generated": len(tasks),
-            "conflicts_found": len(conflicts),
-            "rules": [r.to_dict() for r in saved_rules],
-            "tasks": [t.to_dict() for t in tasks],
-            "conflicts": conflicts
-        }
+                for rule in saved_rules:
+                    if rule.rule_id in conflict_map:
+                        rule.has_conflict = True
+                        rule.conflict_details = json.dumps(conflict_map[rule.rule_id])
+                db.commit()
 
-    except HTTPException:
-        raise
-    except Exception as e:
-        circular.status = "error"
-        db.commit()
-        raise HTTPException(status_code=500, detail=f"Extraction failed: {str(e)}")
+            # Generate MAP tasks
+            tasks = generate_maps_from_rules(db, circular_id, saved_rules)
+
+            circular.status = "processed"
+            db.commit()
+
+            yield {
+                "event": "complete",
+                "data": json.dumps({
+                    "rules_extracted": len(saved_rules),
+                    "tasks_generated": len(tasks),
+                    "conflicts_found": len(conflicts_data)
+                })
+            }
+
+        except Exception as e:
+            print(f"Streaming error: {e}")
+            yield {"event": "error", "data": str(e)}
+        finally:
+            db.close()
+
+    return EventSourceResponse(event_generator())
 
 
 @router.get("/{circular_id}/rules")
