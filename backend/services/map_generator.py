@@ -1,7 +1,7 @@
 """
 Suraksha — MAP Generator Service
 Converts extracted rules into Measurable Action Points (MAPs).
-Each rule generates one or more actionable tasks.
+Uses hybrid keyword-filter + round-robin for department assignment.
 """
 
 import json
@@ -10,49 +10,57 @@ from sqlalchemy.orm import Session
 
 from models.rule import ExtractedRule
 from models.task import MAPTask
-from services.department_router import route_to_department
+from services.department_router import CircularAssigner
+from services.department_data import get_default_owner
 
 
 def generate_maps_from_rules(db: Session, circular_id: int, rules: list[ExtractedRule]) -> list[MAPTask]:
     """
     Generate MAP tasks from extracted rules.
-    Each rule becomes one primary task, routed to the appropriate department.
+    Each rule becomes one primary task, assigned via hybrid keyword-filter + round-robin.
     """
     tasks = []
     task_counter = 1
 
     for rule in rules:
-        departments = rule.get_departments()
+        # Use the hybrid assigner: keyword-filter + round-robin
+        combined_text = f"{rule.title} {rule.description}"
+        assignment = CircularAssigner.assign(combined_text)
 
-        # Generate a task for each affected department
-        for dept in departments:
-            task_ref = f"MAP-{task_counter:03d}"
+        dept = assignment["department"]
+        task_ref = f"MAP-{task_counter:03d}"
 
-            # Generate actionable task title and description
-            task_title, task_desc = _create_task_details(rule, dept)
+        # Generate actionable task title and description
+        task_title, task_desc = _create_task_details(rule, dept)
 
-            task = MAPTask(
-                rule_id=rule.id,
-                circular_id=circular_id,
-                task_ref=task_ref,
-                title=task_title,
-                description=task_desc,
-                department=dept,
-                priority=rule.priority,
-                deadline=rule.deadline,
-                status="Pending",
-                owner=_assign_default_owner(dept),
-                audit_trail=json.dumps([{
-                    "event": "Task created from rule extraction",
-                    "timestamp": datetime.utcnow().isoformat(),
-                    "rule_ref": rule.rule_id,
-                    "auto": True
-                }])
-            )
+        task = MAPTask(
+            rule_id=rule.id,
+            circular_id=circular_id,
+            task_ref=task_ref,
+            title=task_title,
+            description=task_desc,
+            department=dept,
+            priority=rule.priority,
+            deadline=rule.deadline,
+            status="Pending",
+            owner=get_default_owner(dept),
+            sub_vertical=assignment.get("sub_vertical", "") or "",
+            regulator=assignment.get("regulator", "") or "",
+            advisory=assignment.get("advisory", "") or "",
+            routing_reason=assignment.get("routing_reason", "") or "",
+            audit_trail=json.dumps([{
+                "event": "Task created from rule extraction",
+                "timestamp": datetime.utcnow().isoformat(),
+                "rule_ref": rule.rule_id,
+                "assigned_department": dept,
+                "assignment_method": "hybrid_keyword_roundrobin",
+                "auto": True
+            }])
+        )
 
-            db.add(task)
-            tasks.append(task)
-            task_counter += 1
+        db.add(task)
+        tasks.append(task)
+        task_counter += 1
 
     db.commit()
 
@@ -77,13 +85,3 @@ def _create_task_details(rule: ExtractedRule, department: str) -> tuple[str, str
     )
 
     return title, description
-
-
-def _assign_default_owner(department: str) -> str:
-    """Assign a default owner based on department."""
-    owners = {
-        "IT Security": "CISO Office",
-        "Risk Management": "Chief Risk Officer",
-        "Operations": "Head of Operations",
-    }
-    return owners.get(department, "Compliance Team")

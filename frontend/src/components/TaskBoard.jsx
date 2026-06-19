@@ -1,26 +1,73 @@
 import TaskCard from './TaskCard';
-import { Monitor, AlertTriangle, Briefcase } from 'lucide-react';
+import {
+  Monitor, AlertTriangle, Briefcase, Shield, CreditCard,
+  Banknote, FileCheck, Scale, BarChart3, Search
+} from 'lucide-react';
 
+// 10 Business Verticals from Theme 2
 const DEPT_CONFIG = {
-  'IT Security': {
+  'Digital Banking Services': {
     icon: <Monitor size={16} />,
-    color: 'var(--dept-it)',
-    bgColor: 'var(--dept-it-dim)',
+    color: 'var(--dept-dbs)',
+    bgColor: 'var(--dept-dbs-dim)',
+  },
+  'Cybersecurity Wing': {
+    icon: <Shield size={16} />,
+    color: 'var(--dept-csw)',
+    bgColor: 'var(--dept-csw-dim)',
+  },
+  'IT Vertical': {
+    icon: <Monitor size={16} />,
+    color: 'var(--dept-itv)',
+    bgColor: 'var(--dept-itv-dim)',
+  },
+  'Procurement & Vendor Management': {
+    icon: <Briefcase size={16} />,
+    color: 'var(--dept-pvm)',
+    bgColor: 'var(--dept-pvm-dim)',
+  },
+  'Credit Card Vertical': {
+    icon: <CreditCard size={16} />,
+    color: 'var(--dept-ccv)',
+    bgColor: 'var(--dept-ccv-dim)',
+  },
+  'Payments Vertical': {
+    icon: <Banknote size={16} />,
+    color: 'var(--dept-pay)',
+    bgColor: 'var(--dept-pay-dim)',
+  },
+  'Compliance Department': {
+    icon: <FileCheck size={16} />,
+    color: 'var(--dept-cmp)',
+    bgColor: 'var(--dept-cmp-dim)',
+  },
+  'Legal Department': {
+    icon: <Scale size={16} />,
+    color: 'var(--dept-leg)',
+    bgColor: 'var(--dept-leg-dim)',
   },
   'Risk Management': {
     icon: <AlertTriangle size={16} />,
-    color: 'var(--dept-risk)',
-    bgColor: 'var(--dept-risk-dim)',
+    color: 'var(--dept-rsk)',
+    bgColor: 'var(--dept-rsk-dim)',
   },
-  'Operations': {
-    icon: <Briefcase size={16} />,
-    color: 'var(--dept-ops)',
-    bgColor: 'var(--dept-ops-dim)',
+  'Internal Audit': {
+    icon: <Search size={16} />,
+    color: 'var(--dept-aud)',
+    bgColor: 'var(--dept-aud-dim)',
   },
 };
 
+const ALL_DEPARTMENTS = Object.keys(DEPT_CONFIG);
+
 export default function TaskBoard({ tasks }) {
-  const departments = ['IT Security', 'Risk Management', 'Operations'];
+  // Only show departments that have tasks assigned
+  const activeDepartments = ALL_DEPARTMENTS.filter(
+    dept => tasks.some(task => task.department === dept)
+  );
+
+  // If no active departments, show all departments
+  const departments = activeDepartments.length > 0 ? activeDepartments : ALL_DEPARTMENTS;
 
   const getTasksByDepartment = (dept) =>
     tasks.filter(task => task.department === dept);
@@ -29,7 +76,11 @@ export default function TaskBoard({ tasks }) {
     <div className="task-board">
       {departments.map(dept => {
         const deptTasks = getTasksByDepartment(dept);
-        const config = DEPT_CONFIG[dept];
+        const config = DEPT_CONFIG[dept] || {
+          icon: <Briefcase size={16} />,
+          color: 'var(--text-secondary)',
+          bgColor: 'var(--bg-tertiary)',
+        };
 
         return (
           <div key={dept} className="task-column">
@@ -47,7 +98,7 @@ export default function TaskBoard({ tasks }) {
                 }}>
                   {config.icon}
                 </span>
-                {dept}
+                <span style={{ fontSize: '12px' }}>{dept}</span>
               </div>
               <span className="task-column-count">{deptTasks.length}</span>
             </div>

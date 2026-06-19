@@ -27,6 +27,10 @@ class MAPTask(Base):
     verified_at = Column(DateTime, nullable=True)
     evidence_link = Column(String(500), nullable=True)
     audit_trail = Column(Text, default="[]")  # JSON array of verification events
+    sub_vertical = Column(String(200), default="")      # Sub-vertical assignment
+    regulator = Column(String(100), default="")          # Primary regulator (RBI, CERT-In, etc.)
+    advisory = Column(String(500), default="")           # Specific advisory/regulation name
+    routing_reason = Column(Text, default="")            # Why this dept was assigned
 
     # Relationships
     rule = relationship("ExtractedRule", back_populates="tasks")
@@ -60,4 +64,8 @@ class MAPTask(Base):
             "verified_at": self.verified_at.isoformat() if self.verified_at else None,
             "evidence_link": self.evidence_link,
             "audit_trail": self.get_audit_trail(),
+            "sub_vertical": self.sub_vertical,
+            "regulator": self.regulator,
+            "advisory": self.advisory,
+            "routing_reason": self.routing_reason,
         }

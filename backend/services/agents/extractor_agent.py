@@ -1,16 +1,19 @@
 """
 Suraksha — Extractor Agent
 Extracts structured rules from regulatory sections.
+Uses 10 Business Verticals from Theme 2.
 """
 
 import json
 from services.agents.base_agent import BaseAgent
 from services.nlp_fallback import mock_extract_rules
+from services.department_data import DEPARTMENT_NAMES
 
 class ExtractorAgent(BaseAgent):
     def __init__(self):
         super().__init__()
         self.name = "Extractor Agent"
+        dept_list = ", ".join(DEPARTMENT_NAMES)
         self.role = (
             "You are a compliance rules extractor. Given regulatory text sections from an Indian banking circular, "
             "extract each distinct regulatory requirement as a structured rule. "
@@ -18,7 +21,7 @@ class ExtractorAgent(BaseAgent):
             "- rule_id: string (e.g., R-001) "
             "- title: string "
             "- description: string "
-            "- affected_departments: list of strings (from: IT Security, Risk Management, Operations) "
+            f"- affected_departments: list of strings (from: {dept_list}) "
             "- deadline: string (ISO format YYYY-MM-DD or null) "
             "- priority: string (Critical, High, Medium, Low) "
             "- estimated_effort_days: integer "
