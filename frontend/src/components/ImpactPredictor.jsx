@@ -1,9 +1,16 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 const DEPT_COLORS = {
-  'IT Security': '#60a5fa',
-  'Risk Management': '#fbbf24',
-  'Operations': '#34d399',
+  'Digital Banking Services': '#3b82f6',
+  'Cybersecurity Wing': '#ef4444',
+  'IT Vertical': '#8b5cf6',
+  'Procurement & Vendor Management': '#f59e0b',
+  'Credit Card Vertical': '#ec4899',
+  'Payments Vertical': '#06b6d4',
+  'Compliance Department': '#10b981',
+  'Legal Department': '#f97316',
+  'Risk Management': '#eab308',
+  'Internal Audit': '#6366f1',
 };
 
 const STATUS_COLORS = {

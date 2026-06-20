@@ -2,6 +2,7 @@
 Suraksha — Application Configuration
 Loads settings from .env file with sensible defaults.
 Supports Ollama (local LLM) with swappable models.
+Fully offline — no external API keys needed.
 """
 
 import os

@@ -2,6 +2,7 @@
 Suraksha — Conflict Checker Service
 Detects conflicts between new rules and existing rules in the database.
 Uses semantic comparison to flag contradictions.
+Fully offline — uses TF-IDF or mock data.
 """
 
 import json
@@ -69,59 +70,48 @@ async def check_conflicts(new_rules: list[dict], db: Session) -> list[dict]:
         await asyncio.sleep(1.5)  # Simulate processing
         return MOCK_CONFLICT_RESULTS
 
-    # Live mode: compare against existing rules in DB
+    # Ollama mode: compare against existing rules in DB
     existing_rules = db.query(ExtractedRule).all()
 
     if not existing_rules:
         return []
 
-    # Use Claude for semantic comparison
+    # Use TF-IDF for semantic comparison (offline)
     try:
-        from google import genai
-        client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        from sklearn.feature_extraction.text import TfidfVectorizer
+        from sklearn.metrics.pairwise import cosine_similarity
 
-        existing_json = json.dumps([{
+        existing_data = [{
             "rule_id": r.rule_id,
             "title": r.title,
             "description": r.description
-        } for r in existing_rules])
+        } for r in existing_rules]
 
-        new_json = json.dumps(new_rules)
+        new_texts = [r.get("title", "") + " " + r.get("description", "") for r in new_rules]
+        existing_texts = [r["title"] + " " + r["description"] for r in existing_data]
 
-        prompt = f"""Compare these NEW regulatory rules against EXISTING rules and identify any conflicts or contradictions.
+        all_texts = new_texts + existing_texts
+        vectorizer = TfidfVectorizer(stop_words='english')
+        tfidf_matrix = vectorizer.fit_transform(all_texts)
 
-EXISTING RULES:
-{existing_json}
+        new_matrix = tfidf_matrix[:len(new_rules)]
+        existing_matrix = tfidf_matrix[len(new_rules):]
+        similarity = cosine_similarity(new_matrix, existing_matrix)
 
-NEW RULES:
-{new_json}
-
-For each conflict found, provide:
-- new_rule_id: ID of the new rule
-- new_rule_title: Title of the new rule
-- existing_rule_id: ID of the conflicting existing rule
-- existing_rule_title: Title of the existing rule
-- conflict_type: "CONTRADICTS", "SUPERSEDED", or "OVERLAPS"
-- severity: "High", "Medium", or "Low"
-- reason: Detailed explanation of the conflict
-
-Respond with valid JSON: {{"conflicts": [...]}}
-If no conflicts, respond: {{"conflicts": []}}"""
-
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt,
-        )
-
-        response_text = response.text
-        if "```json" in response_text:
-            response_text = response_text.split("```json")[1].split("```")[0]
-        elif "```" in response_text:
-            response_text = response_text.split("```")[1].split("```")[0]
-
-        result = json.loads(response_text.strip())
-        return result.get("conflicts", [])
-
+        conflicts = []
+        for i, new_rule in enumerate(new_rules):
+            for j, existing_rule in enumerate(existing_data):
+                if similarity[i][j] > 0.4:
+                    conflicts.append({
+                        "new_rule_id": new_rule.get("rule_id", "Unknown"),
+                        "new_rule_title": new_rule.get("title", "Unknown"),
+                        "existing_rule_id": existing_rule["rule_id"],
+                        "existing_rule_title": existing_rule["title"],
+                        "conflict_type": "OVERLAPS",
+                        "severity": "Medium",
+                        "reason": f"Semantic overlap detected (Similarity: {similarity[i][j]:.2f}). Needs manual review."
+                    })
+        return conflicts
     except Exception as e:
         print(f"Conflict check error: {e}")
         return []

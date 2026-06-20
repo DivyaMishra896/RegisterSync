@@ -1,6 +1,7 @@
 """
 Suraksha — NLP Fallback Methods
 Provides regex, keyword matching, and TF-IDF logic when LLM_MODE="mock".
+Uses the 10 Business Verticals from Theme 2.
 """
 
 import re
@@ -28,17 +29,13 @@ def mock_read_circular(text: str) -> dict:
     }
 
 def mock_extract_rules(sections: list) -> list:
-    """Mock extractor agent."""
-    rules = []
-    rule_id_counter = 1
-    
-    # We use a hardcoded fallback for consistent demo if no AI is available
+    """Mock extractor agent — uses the 10 Business Verticals from Theme 2."""
     return [
         {
             "rule_id": "R-001",
             "title": "Mandatory VAPT Assessment for Core Banking Systems",
             "description": "All scheduled commercial banks shall conduct Vulnerability Assessment and Penetration Testing (VAPT) of their core banking systems, internet banking platforms, and mobile banking applications at least once every six months.",
-            "affected_departments": ["IT Security"],
+            "affected_departments": ["Cybersecurity Wing", "IT Vertical"],
             "deadline": (date.today() + timedelta(days=90)).isoformat(),
             "priority": "High",
             "estimated_effort_days": 21
@@ -47,10 +44,28 @@ def mock_extract_rules(sections: list) -> list:
             "rule_id": "R-002",
             "title": "Enhanced Customer Due Diligence for High-Risk Accounts",
             "description": "Banks shall implement enhanced due diligence procedures for accounts classified as high-risk under the risk-based approach. This includes periodic review of KYC documents every 6 months.",
-            "affected_departments": ["Operations", "Risk Management"],
+            "affected_departments": ["Compliance Department", "Risk Management"],
             "deadline": (date.today() + timedelta(days=60)).isoformat(),
             "priority": "High",
             "estimated_effort_days": 30
+        },
+        {
+            "rule_id": "R-003",
+            "title": "Cyber Incident Reporting Framework",
+            "description": "All regulated entities must report cyber security incidents to RBI within 6 hours of detection. A detailed incident report must be submitted within 72 hours.",
+            "affected_departments": ["Cybersecurity Wing", "Risk Management"],
+            "deadline": (date.today() + timedelta(days=45)).isoformat(),
+            "priority": "Critical",
+            "estimated_effort_days": 45
+        },
+        {
+            "rule_id": "R-004",
+            "title": "Digital Lending Platform Security Requirements",
+            "description": "All banks offering digital lending services must implement end-to-end encryption for loan origination data, conduct quarterly security assessments of lending platforms.",
+            "affected_departments": ["Digital Banking Services", "Procurement & Vendor Management"],
+            "deadline": (date.today() + timedelta(days=90)).isoformat(),
+            "priority": "High",
+            "estimated_effort_days": 28
         }
     ]
 

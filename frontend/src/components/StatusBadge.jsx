@@ -32,15 +32,25 @@ export function PriorityBadge({ priority }) {
   );
 }
 
+// Maps full department names to CSS badge classes
+const DEPT_BADGE_MAP = {
+  'Digital Banking Services': 'badge-dept-dbs',
+  'Cybersecurity Wing': 'badge-dept-csw',
+  'IT Vertical': 'badge-dept-itv',
+  'Procurement & Vendor Management': 'badge-dept-pvm',
+  'Credit Card Vertical': 'badge-dept-ccv',
+  'Payments Vertical': 'badge-dept-pay',
+  'Compliance Department': 'badge-dept-cmp',
+  'Legal Department': 'badge-dept-leg',
+  'Risk Management': 'badge-dept-rsk',
+  'Internal Audit': 'badge-dept-aud',
+};
+
 export function DepartmentBadge({ department }) {
-  const deptMap = {
-    'IT Security': 'badge-dept-it',
-    'Risk Management': 'badge-dept-risk',
-    'Operations': 'badge-dept-ops',
-  };
+  const badgeClass = DEPT_BADGE_MAP[department] || '';
 
   return (
-    <span className={`badge ${deptMap[department] || ''}`}>
+    <span className={`badge ${badgeClass}`}>
       {department}
     </span>
   );

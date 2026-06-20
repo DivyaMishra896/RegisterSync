@@ -1,20 +1,23 @@
 """
 Suraksha — Router Agent
 Assigns rules to departments with reasoning.
+Uses 10 Business Verticals from Theme 2.
 """
 
 import json
 from services.agents.base_agent import BaseAgent
 from services.department_router import route_rule_to_departments
+from services.department_data import DEPARTMENT_NAMES
 
 class RouterAgent(BaseAgent):
     def __init__(self):
         super().__init__()
         self.name = "Router Agent"
+        dept_list = ", ".join(DEPARTMENT_NAMES)
         self.role = (
             "You are a compliance task router for an Indian bank. Given a regulatory rule title and description, "
             "determine which departments should handle it and explain why. "
-            "Available departments: IT Security, Risk Management, Operations. "
+            f"Available departments: {dept_list}. "
             "Respond ONLY with a valid JSON object matching this schema: "
             "{'departments': [list of strings], 'reasoning': string}"
         )
