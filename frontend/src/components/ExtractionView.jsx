@@ -80,22 +80,50 @@ export default function ExtractionView({ circularId, isStreaming, onComplete }) 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Agent Reasoning Log Panel */}
-      <div className="card" style={{ background: '#1e1e1e', color: '#d4d4d4', border: '1px solid #333' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 16px', borderBottom: '1px solid #333', background: '#252526' }}>
-          <Terminal size={16} style={{ color: 'var(--accent-purple)' }} />
-          <span style={{ fontSize: '13px', fontWeight: 600, color: '#fff', letterSpacing: '0.5px' }}>AGENT REASONING LOG</span>
-          {isStreaming && <Loader2 size={14} style={{ marginLeft: 'auto', color: 'var(--accent-amber)', animation: 'spin 2s linear infinite' }} />}
+      <div className="card" style={{ 
+        background: '#1C1C1E', 
+        color: '#E5E5EA', 
+        border: '1px solid #2C2C2E',
+        borderTop: '2px solid var(--accent-gold)',
+        padding: 0,
+      }}>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '8px', 
+          padding: '14px 20px', 
+          borderBottom: '1px solid #2C2C2E', 
+          background: '#1C1C1E',
+        }}>
+          <Terminal size={14} style={{ color: 'var(--accent-gold)' }} />
+          <span style={{ 
+            fontFamily: 'var(--font-mono)', 
+            fontSize: '10px', 
+            fontWeight: 500, 
+            color: 'var(--accent-gold)', 
+            letterSpacing: '0.15em',
+            textTransform: 'uppercase',
+          }}>Agent Reasoning Log</span>
+          {isStreaming && <Loader2 size={13} style={{ marginLeft: 'auto', color: 'var(--accent-gold)', animation: 'spin 2s linear infinite' }} />}
         </div>
-        <div style={{ padding: '16px', height: '240px', overflowY: 'auto', fontFamily: 'monospace', fontSize: '13px', lineHeight: '1.6' }}>
+        <div style={{ 
+          padding: '16px 20px', 
+          height: '240px', 
+          overflowY: 'auto', 
+          fontFamily: 'var(--font-mono)', 
+          fontSize: '12px', 
+          lineHeight: '1.7',
+          letterSpacing: '0.02em',
+        }}>
           {logs.map((log, i) => (
-            <div key={i} style={{ marginBottom: '8px', display: 'flex', gap: '8px' }}>
-              <span style={{ color: getAgentColor(log.agent), fontWeight: 'bold', minWidth: '100px' }}>
+            <div key={i} style={{ marginBottom: '6px', display: 'flex', gap: '8px' }}>
+              <span style={{ color: getAgentColor(log.agent), fontWeight: 600, minWidth: '100px', fontSize: '11px' }}>
                 [{log.agent}]
               </span>
-              <span style={{ opacity: 0.9 }}>{log.thought}</span>
+              <span style={{ opacity: 0.85, color: '#E5E5EA' }}>{log.thought}</span>
             </div>
           ))}
-          {error && <div style={{ color: '#f87171', marginTop: '12px' }}>Error: {error}</div>}
+          {error && <div style={{ color: '#FF6B6B', marginTop: '12px' }}>Error: {error}</div>}
           <div ref={logEndRef} />
         </div>
       </div>
@@ -110,12 +138,12 @@ export default function ExtractionView({ circularId, isStreaming, onComplete }) 
 
 function getAgentColor(agent) {
   switch(agent) {
-    case 'Orchestrator': return '#c586c0'; // purple
+    case 'Orchestrator': return '#B8860B'; // gold — orchestrator is the conductor
     case 'Reader': return '#569cd6'; // blue
     case 'Extractor': return '#4ec9b0'; // teal
     case 'Conflict': return '#d16969'; // red
     case 'Router': return '#ce9178'; // orange
-    default: return '#808080';
+    default: return '#8E8E93';
   }
 }
 
@@ -123,15 +151,20 @@ function getAgentColor(agent) {
 function ExtractionResults({ data }) {
   return (
     <div>
+      {/* Section Label */}
+      <div className="section-label">
+        <span>Extraction Results</span>
+      </div>
+
       {/* Summary Stats */}
-      <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: '24px' }}>
+      <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: '28px' }}>
         <div className="stat-card-lg">
-          <div className="stat-icon" style={{ background: 'var(--accent-purple-dim)', color: 'var(--accent-purple)' }}>📋</div>
+          <div className="stat-icon" style={{ background: 'var(--accent-blue-dim)', color: 'var(--accent-blue)' }}>📋</div>
           <div className="stat-value">{data.rules_extracted}</div>
           <div className="stat-label">Rules Extracted</div>
         </div>
         <div className="stat-card-lg">
-          <div className="stat-icon" style={{ background: 'var(--accent-blue-dim)', color: 'var(--accent-blue)' }}>✅</div>
+          <div className="stat-icon" style={{ background: 'var(--accent-gold-dim)', color: 'var(--accent-gold)' }}>✅</div>
           <div className="stat-value">{data.tasks_generated}</div>
           <div className="stat-label">MAPs Generated</div>
         </div>
@@ -146,12 +179,12 @@ function ExtractionResults({ data }) {
 
       {/* Conflicts / Regulatory Diff */}
       {data.conflicts && data.conflicts.length > 0 && (
-        <div style={{ marginBottom: '24px' }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ marginBottom: '28px' }}>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 600, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             ⚠️ Regulatory Diff: Conflict Analysis
           </h3>
           {data.conflicts.map((conflict, i) => (
-            <div key={i} className="card" style={{ marginBottom: '16px', border: '1px solid var(--accent-red-dim)', background: 'rgba(248,113,113,0.03)' }}>
+            <div key={i} className="card" style={{ marginBottom: '16px', border: '1px solid var(--accent-red-dim)', background: 'rgba(198,40,40,0.02)', borderTop: '2px solid var(--accent-red)' }}>
               <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span className={`badge ${conflict.severity === 'High' ? 'badge-high' : 'badge-medium'}`}>
@@ -162,27 +195,27 @@ function ExtractionResults({ data }) {
                   </span>
                 </div>
               </div>
-              <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', fontSize: '13px', color: 'var(--text-secondary)' }}>
+              <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
                 <strong>Agent Analysis:</strong> {conflict.reason}
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: 'var(--border-color)' }}>
                 {/* Old Rule */}
                 <div style={{ padding: '16px', background: 'var(--bg-secondary)' }}>
-                  <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', fontWeight: 500, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '8px' }}>
                     EXISTING RULE (OLD)
                   </div>
-                  <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)' }}>
-                    <span style={{ color: 'var(--accent-red)', fontWeight: 800, marginRight: '8px' }}>-</span>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)' }}>
+                    <span style={{ color: 'var(--accent-red)', fontWeight: 800, marginRight: '8px' }}>−</span>
                     {conflict.existing_rule_title}
                   </div>
                 </div>
                 
                 {/* New Rule */}
                 <div style={{ padding: '16px', background: 'var(--bg-secondary)' }}>
-                  <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', fontWeight: 500, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '8px' }}>
                     NEW CIRCULAR (NEW)
                   </div>
-                  <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)' }}>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '14px', fontWeight: 500, color: 'var(--text-primary)' }}>
                     <span style={{ color: 'var(--accent-emerald)', fontWeight: 800, marginRight: '8px' }}>+</span>
                     {conflict.new_rule_title}
                   </div>
@@ -197,7 +230,7 @@ function ExtractionResults({ data }) {
       <div className="extraction-container">
         <div className="extraction-panel">
           <div className="extraction-panel-header">
-            <Brain size={16} style={{ color: 'var(--accent-purple)' }} />
+            <Brain size={16} style={{ color: 'var(--accent-blue)' }} />
             Extracted Rules
           </div>
           <div className="extraction-panel-body">
@@ -227,7 +260,7 @@ function ExtractionResults({ data }) {
         {/* Generated Tasks */}
         <div className="extraction-panel">
           <div className="extraction-panel-header">
-            <Sparkles size={16} style={{ color: 'var(--accent-emerald)' }} />
+            <Sparkles size={16} style={{ color: 'var(--accent-gold)' }} />
             Generated MAPs
           </div>
           <div className="extraction-panel-body">
@@ -237,7 +270,7 @@ function ExtractionResults({ data }) {
                   <span className="rule-id">{task.task_ref}</span>
                   <StatusBadge status={task.status} />
                 </div>
-                <div className="rule-title" style={{ fontSize: '13px' }}>{task.title}</div>
+                <div className="rule-title" style={{ fontSize: '14px' }}>{task.title}</div>
                 <div className="rule-meta" style={{ marginTop: '8px' }}>
                   <DepartmentBadge department={task.department} />
                   <PriorityBadge priority={task.priority} />

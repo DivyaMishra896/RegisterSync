@@ -59,9 +59,9 @@ export default function UploadZone({ onUploadComplete }) {
   if (success) {
     return (
       <div className="upload-zone" style={{ borderColor: 'var(--accent-emerald)', borderStyle: 'solid' }}>
-        <CheckCircle size={64} style={{ color: 'var(--accent-emerald)', margin: '0 auto 20px', display: 'block' }} />
+        <CheckCircle size={52} style={{ color: 'var(--accent-emerald)', margin: '0 auto 20px', display: 'block' }} />
         <div className="upload-title" style={{ color: 'var(--accent-emerald)' }}>
-          Upload Successful!
+          Upload Successful
         </div>
         <div className="upload-subtitle">
           {success.filename} — {success.text_length?.toLocaleString()} characters extracted in {success.num_chunks} chunks
@@ -82,29 +82,29 @@ export default function UploadZone({ onUploadComplete }) {
 
       {!uploading ? (
         <>
-          <Upload className="upload-icon" size={64} />
+          <Upload className="upload-icon" size={52} />
           <div className="upload-title">
-            {isDragActive ? 'Drop your circular here' : 'Upload RBI / SEBI Circular'}
+            {isDragActive ? 'Drop Your Circular Here' : 'Upload RBI / SEBI Circular'}
           </div>
           <div className="upload-subtitle">
             Drag and drop a PDF file, or click to browse
           </div>
-          <div style={{ marginTop: '12px' }}>
+          <div style={{ marginTop: '16px' }}>
             <span className="badge" style={{ background: 'var(--bg-tertiary)', color: 'var(--text-tertiary)' }}>
-              PDF files only • Max 20MB
+              PDF files only · Max 20MB
             </span>
           </div>
         </>
       ) : (
         <>
-          <FileText size={64} style={{ color: 'var(--accent-purple)', margin: '0 auto 20px', display: 'block' }} />
-          <div className="upload-title">Processing PDF...</div>
+          <FileText size={52} style={{ color: 'var(--accent-gold)', margin: '0 auto 20px', display: 'block' }} />
+          <div className="upload-title">Processing PDF…</div>
           <div className="upload-subtitle">Extracting text from document</div>
           <div className="upload-progress">
             <div className="progress-bar">
               <div className="progress-fill" style={{ width: `${progress}%` }}></div>
             </div>
-            <div style={{ marginTop: '8px', fontSize: '13px', color: 'var(--text-secondary)' }}>
+            <div style={{ marginTop: '8px', fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--text-secondary)', letterSpacing: '0.04em' }}>
               {progress}%
             </div>
           </div>

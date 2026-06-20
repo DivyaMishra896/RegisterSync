@@ -29,7 +29,7 @@ export default function UploadPage() {
     <div className="page-enter">
       <div className="page-header">
         <div className="page-title">
-          <Upload size={20} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />
+          <Upload size={20} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle', opacity: 0.6 }} />
           Upload Circular
         </div>
         <div className="page-subtitle">
@@ -43,12 +43,14 @@ export default function UploadPage() {
           display: 'flex',
           alignItems: 'center',
           gap: '12px',
-          marginBottom: '28px',
+          marginBottom: '32px',
+          padding: '20px 0',
+          borderBottom: '1px solid var(--border-color)',
         }}>
           <StepIndicator number={1} label="Upload PDF" active={step === 'upload'} completed={step !== 'upload'} />
-          <ArrowRight size={16} style={{ color: 'var(--text-tertiary)' }} />
+          <div style={{ width: '40px', height: '1px', background: 'var(--border-color)' }} />
           <StepIndicator number={2} label="AI Extraction" active={step === 'extract' || extracting} completed={step === 'done'} />
-          <ArrowRight size={16} style={{ color: 'var(--text-tertiary)' }} />
+          <div style={{ width: '40px', height: '1px', background: 'var(--border-color)' }} />
           <StepIndicator number={3} label="Review & Dashboard" active={step === 'done'} completed={false} />
         </div>
 
@@ -59,12 +61,12 @@ export default function UploadPage() {
 
         {/* Extract Step Start */}
         {step === 'extract' && !extracting && (
-          <div className="card" style={{ textAlign: 'center', padding: '50px' }}>
-            <Sparkles size={48} style={{ color: 'var(--accent-purple)', margin: '0 auto 16px', display: 'block' }} />
-            <div style={{ fontSize: '18px', fontWeight: 600, marginBottom: '8px' }}>
-              PDF uploaded successfully!
+          <div className="card" style={{ textAlign: 'center', padding: '56px 40px', borderTop: '2px solid var(--accent-gold)' }}>
+            <Sparkles size={44} style={{ color: 'var(--accent-gold)', margin: '0 auto 20px', display: 'block' }} />
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 600, marginBottom: '10px' }}>
+              PDF Uploaded Successfully
             </div>
-            <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
+            <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '28px', maxWidth: '480px', margin: '0 auto 28px', lineHeight: '1.7' }}>
               Ready to extract rules using AI. Watch the Multi-Agent system analyze the document, 
               extract compliance requirements, and check for conflicts in real-time.
             </div>
@@ -87,7 +89,7 @@ export default function UploadPage() {
 
         {/* Go to Dashboard */}
         {step === 'done' && (
-          <div style={{ marginTop: '24px', textAlign: 'center' }}>
+          <div style={{ marginTop: '28px', textAlign: 'center' }}>
             <button className="btn btn-primary btn-lg" onClick={() => navigate('/dashboard')}>
               <ArrowRight size={18} />
               View Compliance Dashboard
@@ -104,31 +106,37 @@ function StepIndicator({ number, label, active, completed }) {
     <div style={{
       display: 'flex',
       alignItems: 'center',
-      gap: '8px',
-      opacity: active || completed ? 1 : 0.4,
+      gap: '10px',
+      opacity: active || completed ? 1 : 0.35,
+      transition: 'all 200ms ease-out',
     }}>
       <div style={{
-        width: '28px',
-        height: '28px',
+        width: '30px',
+        height: '30px',
         borderRadius: '50%',
         background: completed
           ? 'var(--accent-emerald)'
           : active
-          ? 'var(--accent-purple)'
+          ? 'var(--accent-blue)'
           : 'var(--bg-tertiary)',
+        border: completed || active ? 'none' : '1px solid var(--border-color)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         fontSize: '12px',
-        fontWeight: 700,
+        fontWeight: 600,
+        fontFamily: 'var(--font-mono)',
         color: completed || active ? '#fff' : 'var(--text-tertiary)',
-        transition: 'all var(--transition-base)',
+        transition: 'all 200ms ease-out',
       }}>
         {completed ? '✓' : number}
       </div>
       <span style={{
-        fontSize: '13px',
-        fontWeight: active ? 600 : 400,
+        fontFamily: 'var(--font-mono)',
+        fontSize: '11px',
+        fontWeight: 500,
+        letterSpacing: '0.1em',
+        textTransform: 'uppercase',
         color: active ? 'var(--text-primary)' : 'var(--text-secondary)',
       }}>
         {label}

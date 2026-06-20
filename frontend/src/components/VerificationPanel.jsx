@@ -37,22 +37,22 @@ export default function VerificationPanel({ onVerificationComplete }) {
   return (
     <div className="verification-panel">
       <div className="verification-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
           <div style={{
             width: '40px',
             height: '40px',
             borderRadius: 'var(--radius-md)',
-            background: 'var(--accent-emerald-dim)',
+            background: 'var(--accent-blue-dim)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-            <Shield size={20} style={{ color: 'var(--accent-emerald)' }} />
+            <Shield size={20} style={{ color: 'var(--accent-blue)' }} />
           </div>
           <div>
-            <div style={{ fontSize: '16px', fontWeight: 600 }}>Verification Agent</div>
-            <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-              Reads system logs to auto-verify task compliance
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 600 }}>Verification Agent</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-tertiary)', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: '2px' }}>
+              Reads system logs to auto-verify compliance
             </div>
           </div>
         </div>
@@ -65,7 +65,7 @@ export default function VerificationPanel({ onVerificationComplete }) {
           {running ? (
             <>
               <div className="spinner"></div>
-              Scanning Logs...
+              Scanning Logs…
             </>
           ) : (
             <>
@@ -77,7 +77,7 @@ export default function VerificationPanel({ onVerificationComplete }) {
       </div>
 
       {error && (
-        <div style={{ padding: '12px 16px', background: 'var(--accent-red-dim)', borderRadius: 'var(--radius-md)', color: 'var(--accent-red)', fontSize: '13px', marginBottom: '16px' }}>
+        <div style={{ padding: '12px 16px', background: 'var(--accent-red-dim)', borderRadius: 'var(--radius-md)', color: 'var(--accent-red)', fontSize: '13px', marginBottom: '16px', border: '1px solid rgba(198, 40, 40, 0.12)' }}>
           {error}
         </div>
       )}
@@ -105,7 +105,7 @@ export default function VerificationPanel({ onVerificationComplete }) {
           </div>
 
           {/* Timeline */}
-          <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px' }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 600, marginBottom: '14px' }}>
             Verification Log
           </div>
           <div className="verification-timeline">
@@ -123,12 +123,12 @@ export default function VerificationPanel({ onVerificationComplete }) {
                   </div>
                   {detail.evidence && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                      <FileText size={12} style={{ color: 'var(--accent-emerald)' }} />
-                      <span style={{ fontSize: '11px', color: 'var(--accent-emerald)' }}>{detail.evidence}</span>
+                      <FileText size={11} style={{ color: 'var(--accent-emerald)' }} />
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--accent-emerald)', letterSpacing: '0.04em' }}>{detail.evidence}</span>
                     </div>
                   )}
                   {detail.note && (
-                    <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '4px', fontStyle: 'italic' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '4px', fontStyle: 'italic', lineHeight: '1.5' }}>
                       {detail.note}
                     </div>
                   )}

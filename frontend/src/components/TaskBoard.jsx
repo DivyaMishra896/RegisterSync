@@ -7,52 +7,52 @@ import {
 // 10 Business Verticals from Theme 2
 const DEPT_CONFIG = {
   'Digital Banking Services': {
-    icon: <Monitor size={16} />,
+    icon: <Monitor size={14} />,
     color: 'var(--dept-dbs)',
     bgColor: 'var(--dept-dbs-dim)',
   },
   'Cybersecurity Wing': {
-    icon: <Shield size={16} />,
+    icon: <Shield size={14} />,
     color: 'var(--dept-csw)',
     bgColor: 'var(--dept-csw-dim)',
   },
   'IT Vertical': {
-    icon: <Monitor size={16} />,
+    icon: <Monitor size={14} />,
     color: 'var(--dept-itv)',
     bgColor: 'var(--dept-itv-dim)',
   },
   'Procurement & Vendor Management': {
-    icon: <Briefcase size={16} />,
+    icon: <Briefcase size={14} />,
     color: 'var(--dept-pvm)',
     bgColor: 'var(--dept-pvm-dim)',
   },
   'Credit Card Vertical': {
-    icon: <CreditCard size={16} />,
+    icon: <CreditCard size={14} />,
     color: 'var(--dept-ccv)',
     bgColor: 'var(--dept-ccv-dim)',
   },
   'Payments Vertical': {
-    icon: <Banknote size={16} />,
+    icon: <Banknote size={14} />,
     color: 'var(--dept-pay)',
     bgColor: 'var(--dept-pay-dim)',
   },
   'Compliance Department': {
-    icon: <FileCheck size={16} />,
+    icon: <FileCheck size={14} />,
     color: 'var(--dept-cmp)',
     bgColor: 'var(--dept-cmp-dim)',
   },
   'Legal Department': {
-    icon: <Scale size={16} />,
+    icon: <Scale size={14} />,
     color: 'var(--dept-leg)',
     bgColor: 'var(--dept-leg-dim)',
   },
   'Risk Management': {
-    icon: <AlertTriangle size={16} />,
+    icon: <AlertTriangle size={14} />,
     color: 'var(--dept-rsk)',
     bgColor: 'var(--dept-rsk-dim)',
   },
   'Internal Audit': {
-    icon: <Search size={16} />,
+    icon: <Search size={14} />,
     color: 'var(--dept-aud)',
     bgColor: 'var(--dept-aud-dim)',
   },
@@ -77,7 +77,7 @@ export default function TaskBoard({ tasks }) {
       {departments.map(dept => {
         const deptTasks = getTasksByDepartment(dept);
         const config = DEPT_CONFIG[dept] || {
-          icon: <Briefcase size={16} />,
+          icon: <Briefcase size={14} />,
           color: 'var(--text-secondary)',
           bgColor: 'var(--bg-tertiary)',
         };
@@ -87,8 +87,8 @@ export default function TaskBoard({ tasks }) {
             <div className="task-column-header">
               <div className="task-column-title" style={{ color: config.color }}>
                 <span style={{
-                  width: '28px',
-                  height: '28px',
+                  width: '26px',
+                  height: '26px',
                   borderRadius: 'var(--radius-sm)',
                   background: config.bgColor,
                   display: 'flex',
@@ -98,7 +98,7 @@ export default function TaskBoard({ tasks }) {
                 }}>
                   {config.icon}
                 </span>
-                <span style={{ fontSize: '12px' }}>{dept}</span>
+                <span>{dept}</span>
               </div>
               <span className="task-column-count">{deptTasks.length}</span>
             </div>

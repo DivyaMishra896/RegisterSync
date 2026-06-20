@@ -72,7 +72,7 @@ export default function DashboardPage() {
       <div className="page-enter">
         <div className="page-header">
           <div className="page-title">
-            <LayoutDashboard size={20} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />
+            <LayoutDashboard size={20} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle', opacity: 0.6 }} />
             Compliance Dashboard
           </div>
         </div>
@@ -80,9 +80,9 @@ export default function DashboardPage() {
           <div className="stats-grid">
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="stat-card-lg">
-                <div className="skeleton" style={{ width: '40px', height: '40px', marginBottom: '12px' }}></div>
-                <div className="skeleton" style={{ width: '60px', height: '32px', marginBottom: '8px' }}></div>
-                <div className="skeleton" style={{ width: '100px', height: '14px' }}></div>
+                <div className="skeleton" style={{ width: '40px', height: '40px', marginBottom: '14px' }}></div>
+                <div className="skeleton" style={{ width: '60px', height: '34px', marginBottom: '8px' }}></div>
+                <div className="skeleton" style={{ width: '100px', height: '12px' }}></div>
               </div>
             ))}
           </div>
@@ -96,7 +96,7 @@ export default function DashboardPage() {
       <div className="page-enter">
         <div className="page-header">
           <div className="page-title">
-            <LayoutDashboard size={20} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />
+            <LayoutDashboard size={20} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle', opacity: 0.6 }} />
             Compliance Dashboard
           </div>
           <div className="page-subtitle">Monitor and verify regulatory compliance tasks</div>
@@ -104,7 +104,7 @@ export default function DashboardPage() {
         <div className="page-content">
           <div className="empty-state">
             <div className="empty-state-icon">📋</div>
-            <div className="empty-state-title">No tasks yet</div>
+            <div className="empty-state-title">No Tasks Yet</div>
             <div className="empty-state-text">
               Upload a regulatory circular first. Go to the Upload page to get started.
             </div>
@@ -119,7 +119,7 @@ export default function DashboardPage() {
       <div className="page-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <div className="page-title">
-            <LayoutDashboard size={20} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle' }} />
+            <LayoutDashboard size={20} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'middle', opacity: 0.6 }} />
             Compliance Dashboard
           </div>
           <div className="page-subtitle">Monitor and verify regulatory compliance tasks</div>
@@ -131,10 +131,15 @@ export default function DashboardPage() {
       </div>
 
       <div className="page-content">
+        {/* Section Label */}
+        <div className="section-label">
+          <span>Overview</span>
+        </div>
+
         {/* Stats Overview */}
         <div className="stats-grid">
           <div className="stat-card-lg">
-            <div className="stat-icon" style={{ background: 'var(--accent-purple-dim)', color: 'var(--accent-purple)' }}>
+            <div className="stat-icon" style={{ background: 'var(--accent-blue-dim)', color: 'var(--accent-blue)' }}>
               <TrendingUp size={18} />
             </div>
             <div className="stat-value">{stats?.total || 0}</div>
@@ -161,7 +166,7 @@ export default function DashboardPage() {
             <div className="stat-label">Pending</div>
           </div>
 
-          <div className="stat-card-lg" style={{ background: stats?.risk_level?.includes('CRITICAL') || stats?.risk_level?.includes('HIGH') ? 'rgba(248, 113, 113, 0.05)' : 'var(--bg-secondary)' }}>
+          <div className="stat-card-lg" style={{ background: stats?.risk_level?.includes('CRITICAL') || stats?.risk_level?.includes('HIGH') ? 'rgba(198, 40, 40, 0.03)' : 'var(--bg-secondary)' }}>
             <div className="stat-icon" style={{ 
               background: stats?.risk_score < 75 ? 'var(--accent-red-dim)' : 'var(--accent-emerald-dim)', 
               color: stats?.risk_score < 75 ? 'var(--accent-red)' : 'var(--accent-emerald)' 
@@ -184,9 +189,14 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Section Label */}
+        <div className="section-label">
+          <span>Task Board</span>
+        </div>
+
         {/* Filter Bar */}
         <div className="filter-bar">
-          <span style={{ fontSize: '13px', color: 'var(--text-secondary)', marginRight: '4px' }}>Filter:</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-tertiary)', marginRight: '4px', textTransform: 'uppercase', letterSpacing: '0.12em' }}>Filter:</span>
           {['all', 'Pending', 'Verified', 'Failed', 'Partially Done'].map(filter => (
             <button
               key={filter}
@@ -215,13 +225,21 @@ export default function DashboardPage() {
 
         {/* Impact Charts */}
         {showCharts && (
-          <div style={{ marginTop: '28px' }}>
+          <div style={{ marginTop: '32px' }}>
+            <div className="section-label">
+              <span>Analytics</span>
+            </div>
             <ImpactPredictor stats={stats} tasks={tasks} />
           </div>
         )}
 
         {/* Verification Agent */}
-        <VerificationPanel onVerificationComplete={handleVerificationComplete} />
+        <div style={{ marginTop: '32px' }}>
+          <div className="section-label">
+            <span>Verification</span>
+          </div>
+          <VerificationPanel onVerificationComplete={handleVerificationComplete} />
+        </div>
       </div>
     </div>
   );

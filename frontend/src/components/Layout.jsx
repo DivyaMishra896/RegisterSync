@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { Upload, LayoutDashboard, FileText, Shield, Activity } from 'lucide-react';
 import { healthCheck } from '../api/client';
+import logoImg from '../assets/suraksha-logo.png';
 
 export default function Layout() {
   const [llmMode, setLlmMode] = useState('mock');
@@ -24,9 +25,12 @@ export default function Layout() {
       <aside className="sidebar">
         <div className="sidebar-header">
           <div className="sidebar-logo">
-            <div className="sidebar-logo-icon">🛡️</div>
+            <div className="sidebar-logo-icon">
+              <img src={logoImg} alt="RegisterSync shield logo" />
+            </div>
             <div>
-              <div className="sidebar-logo-text">Suraksha</div>
+              <div className="sidebar-logo-bank">Canara Bank</div>
+              <div className="sidebar-logo-text">RegisterSync</div>
               <div className="sidebar-logo-sub">Compliance AI</div>
             </div>
           </div>
@@ -48,9 +52,9 @@ export default function Layout() {
         </nav>
 
         <div className="sidebar-footer">
-          <div className="sidebar-footer-badge" style={{ textTransform: 'capitalize' }}>
-            <span className="sidebar-footer-dot" style={{ background: llmMode === 'ollama' ? 'var(--accent-purple)' : 'var(--accent-amber)' }}></span>
-            {llmMode === 'ollama' ? 'Agentic Mode Active' : 'Mock Mode Active'}
+          <div className="sidebar-footer-badge" style={{ textTransform: 'uppercase' }}>
+            <span className="sidebar-footer-dot" style={{ background: llmMode === 'ollama' ? 'var(--accent-blue)' : 'var(--accent-amber)' }}></span>
+            {llmMode === 'ollama' ? 'Agentic Mode' : 'Mock Mode'}
           </div>
         </div>
       </aside>

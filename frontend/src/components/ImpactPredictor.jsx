@@ -2,22 +2,22 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 const DEPT_COLORS = {
   'Digital Banking Services': '#3b82f6',
-  'Cybersecurity Wing': '#ef4444',
-  'IT Vertical': '#8b5cf6',
-  'Procurement & Vendor Management': '#f59e0b',
-  'Credit Card Vertical': '#ec4899',
-  'Payments Vertical': '#06b6d4',
-  'Compliance Department': '#10b981',
-  'Legal Department': '#f97316',
-  'Risk Management': '#eab308',
-  'Internal Audit': '#6366f1',
+  'Cybersecurity Wing': '#c62828',
+  'IT Vertical': '#6d4aab',
+  'Procurement & Vendor Management': '#d97706',
+  'Credit Card Vertical': '#c2185b',
+  'Payments Vertical': '#0284c7',
+  'Compliance Department': '#107c10',
+  'Legal Department': '#e65100',
+  'Risk Management': '#f9a825',
+  'Internal Audit': '#4a52c9',
 };
 
 const STATUS_COLORS = {
-  'Pending': '#fbbf24',
-  'Verified': '#34d399',
-  'Failed': '#f87171',
-  'Partially Done': '#fb923c',
+  'Pending': '#d97706',
+  'Verified': '#107c10',
+  'Failed': '#c62828',
+  'Partially Done': '#e65100',
 };
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -25,18 +25,17 @@ const CustomTooltip = ({ active, payload, label }) => {
 
   return (
     <div style={{
-      background: 'rgba(255, 255, 255, 0.95)',
-      border: '1px solid rgba(0,0,0,0.1)',
+      background: '#FFFFFF',
+      border: '1px solid #E8E4DF',
       borderRadius: '8px',
-      padding: '10px 14px',
-      backdropFilter: 'blur(10px)',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)'
+      padding: '12px 16px',
+      boxShadow: '0 4px 12px rgba(26, 26, 26, 0.06)',
     }}>
-      <div style={{ fontSize: '12px', fontWeight: 600, color: '#000000', marginBottom: '4px' }}>{label}</div>
+      <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '13px', fontWeight: 600, color: '#1A1A1A', marginBottom: '6px' }}>{label}</div>
       {payload.map((entry, i) => (
-        <div key={i} style={{ fontSize: '11px', color: '#4b4b5e', display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div key={i} style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '11px', color: '#5A5A5A', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
           <span style={{ width: '8px', height: '8px', borderRadius: '2px', background: entry.color }}></span>
-          {entry.name}: <span style={{ fontWeight: 600, color: '#000000' }}>{entry.value}</span> {entry.name === 'Effort' ? 'days' : 'tasks'}
+          {entry.name}: <span style={{ fontWeight: 600, color: '#1A1A1A' }}>{entry.value}</span> {entry.name === 'Effort' ? 'days' : 'tasks'}
         </div>
       ))}
     </div>
@@ -59,7 +58,7 @@ export default function ImpactPredictor({ stats, tasks }) {
   const effortData = Object.entries(stats.effort_by_department || {}).map(([dept, effort]) => ({
     department: dept,
     Effort: effort,
-    fill: DEPT_COLORS[dept] || '#6b7280',
+    fill: DEPT_COLORS[dept] || '#8A8A8A',
   }));
 
   // Tasks by department
@@ -75,7 +74,7 @@ export default function ImpactPredictor({ stats, tasks }) {
   const statusData = Object.entries(stats.by_status || {}).map(([status, count]) => ({
     name: status,
     value: count,
-    color: STATUS_COLORS[status] || '#6b7280',
+    color: STATUS_COLORS[status] || '#8A8A8A',
   }));
 
   return (
@@ -85,21 +84,21 @@ export default function ImpactPredictor({ stats, tasks }) {
         <div className="chart-title">⏱ Estimated Effort by Department</div>
         <ResponsiveContainer width="100%" height={260}>
           <BarChart data={effortData} margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E8E4DF" />
             <XAxis
               dataKey="department"
-              tick={{ fill: '#8b8b9e', fontSize: 11 }}
-              axisLine={{ stroke: 'rgba(0,0,0,0.1)' }}
+              tick={{ fill: '#8A8A8A', fontSize: 10, fontFamily: "'IBM Plex Mono', monospace" }}
+              axisLine={{ stroke: '#E8E4DF' }}
               tickLine={false}
             />
             <YAxis
-              tick={{ fill: '#8b8b9e', fontSize: 11 }}
-              axisLine={{ stroke: 'rgba(0,0,0,0.1)' }}
+              tick={{ fill: '#8A8A8A', fontSize: 10, fontFamily: "'IBM Plex Mono', monospace" }}
+              axisLine={{ stroke: '#E8E4DF' }}
               tickLine={false}
-              label={{ value: 'Days', angle: -90, position: 'insideLeft', fill: '#5a5a6e', fontSize: 11 }}
+              label={{ value: 'Days', angle: -90, position: 'insideLeft', fill: '#5A5A5A', fontSize: 11, fontFamily: "'IBM Plex Mono', monospace" }}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="Effort" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="Effort" radius={[3, 3, 0, 0]}>
               {effortData.map((entry, index) => (
                 <Cell key={index} fill={entry.fill} />
               ))}
@@ -132,8 +131,8 @@ export default function ImpactPredictor({ stats, tasks }) {
               <Legend
                 verticalAlign="bottom"
                 iconType="circle"
-                iconSize={8}
-                formatter={(value) => <span style={{ color: '#8b8b9e', fontSize: '11px' }}>{value}</span>}
+                iconSize={7}
+                formatter={(value) => <span style={{ color: '#8A8A8A', fontSize: '10px', fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.06em', textTransform: 'uppercase' }}>{value}</span>}
               />
             </PieChart>
           </ResponsiveContainer>
@@ -145,27 +144,27 @@ export default function ImpactPredictor({ stats, tasks }) {
         <div className="chart-title">🏢 Tasks by Department & Status</div>
         <ResponsiveContainer width="100%" height={260}>
           <BarChart data={taskCountData} margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E8E4DF" />
             <XAxis
               dataKey="department"
-              tick={{ fill: '#8b8b9e', fontSize: 11 }}
-              axisLine={{ stroke: 'rgba(0,0,0,0.1)' }}
+              tick={{ fill: '#8A8A8A', fontSize: 10, fontFamily: "'IBM Plex Mono', monospace" }}
+              axisLine={{ stroke: '#E8E4DF' }}
               tickLine={false}
             />
             <YAxis
-              tick={{ fill: '#8b8b9e', fontSize: 11 }}
-              axisLine={{ stroke: 'rgba(0,0,0,0.1)' }}
+              tick={{ fill: '#8A8A8A', fontSize: 10, fontFamily: "'IBM Plex Mono', monospace" }}
+              axisLine={{ stroke: '#E8E4DF' }}
               tickLine={false}
             />
             <Tooltip content={<CustomTooltip />} />
             <Legend
               iconType="circle"
-              iconSize={8}
-              formatter={(value) => <span style={{ color: '#8b8b9e', fontSize: '11px' }}>{value}</span>}
+              iconSize={7}
+              formatter={(value) => <span style={{ color: '#8A8A8A', fontSize: '10px', fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.06em', textTransform: 'uppercase' }}>{value}</span>}
             />
-            <Bar dataKey="Verified" fill="#34d399" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="Pending" fill="#fbbf24" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="Failed" fill="#f87171" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="Verified" fill="#107c10" radius={[3, 3, 0, 0]} />
+            <Bar dataKey="Pending" fill="#d97706" radius={[3, 3, 0, 0]} />
+            <Bar dataKey="Failed" fill="#c62828" radius={[3, 3, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
