@@ -1,8 +1,3 @@
-"""
-Suraksha — Tasks Router
-CRUD operations for MAP tasks and dashboard statistics.
-"""
-
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -21,7 +16,6 @@ async def list_tasks(
     circular_id: int = Query(None, description="Filter by circular"),
     db: Session = Depends(get_db)
 ):
-    """List all MAP tasks with optional filters."""
     query = db.query(MAPTask)
 
     if department:
@@ -39,7 +33,6 @@ async def list_tasks(
 
 @router.get("/stats")
 async def get_task_stats(db: Session = Depends(get_db)):
-    """Get aggregate statistics for the dashboard."""
     all_tasks = db.query(MAPTask).all()
 
     if not all_tasks:
@@ -51,12 +44,10 @@ async def get_task_stats(db: Session = Depends(get_db)):
             "compliance_rate": 0
         }
 
-    # Status breakdown
     by_status = {}
     for task in all_tasks:
         by_status[task.status] = by_status.get(task.status, 0) + 1
 
-    # Department breakdown
     by_department = {}
     for task in all_tasks:
         dept = task.department or "Unassigned"
@@ -70,17 +61,14 @@ async def get_task_stats(db: Session = Depends(get_db)):
         elif task.status == "Failed":
             by_department[dept]["failed"] += 1
 
-    # Priority breakdown
     by_priority = {}
     for task in all_tasks:
         prio = task.priority or "Medium"
         by_priority[prio] = by_priority.get(prio, 0) + 1
 
-    # Compliance rate
     verified = sum(1 for t in all_tasks if t.status == "Verified")
     compliance_rate = round((verified / len(all_tasks)) * 100, 1) if all_tasks else 0
 
-    # Effort summary
     total_effort = 0
     effort_by_dept = {}
     for task in all_tasks:
@@ -90,7 +78,6 @@ async def get_task_stats(db: Session = Depends(get_db)):
             dept = task.department or "Unassigned"
             effort_by_dept[dept] = effort_by_dept.get(dept, 0) + effort
 
-    # Compliance risk score
     from models.rule import ExtractedRule
     unresolved_conflicts = db.query(ExtractedRule).filter(ExtractedRule.has_conflict == True).count()
     
@@ -107,9 +94,8 @@ async def get_task_stats(db: Session = Depends(get_db)):
                 risk_score -= 2
                 
     risk_score -= (unresolved_conflicts * 10)
-    risk_score = max(0, min(100, risk_score)) # Clamp between 0-100
+    risk_score = max(0, min(100, risk_score)) 
     
-    # Classify risk
     risk_level = "LOW RISK"
     if risk_score < 50:
         risk_level = "CRITICAL RISK"
@@ -134,7 +120,6 @@ async def get_task_stats(db: Session = Depends(get_db)):
 
 @router.get("/{task_id}")
 async def get_task(task_id: int, db: Session = Depends(get_db)):
-    """Get a specific task with its details."""
     task = db.query(MAPTask).filter(MAPTask.id == task_id).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
@@ -143,7 +128,6 @@ async def get_task(task_id: int, db: Session = Depends(get_db)):
 
 @router.patch("/{task_id}")
 async def update_task(task_id: int, updates: dict, db: Session = Depends(get_db)):
-    """Update a task's status or other fields."""
     task = db.query(MAPTask).filter(MAPTask.id == task_id).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")

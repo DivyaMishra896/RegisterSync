@@ -21,7 +21,6 @@ export default function Layout() {
 
   return (
     <div className="app-layout">
-      {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-header">
           <div className="sidebar-logo">
@@ -59,7 +58,6 @@ export default function Layout() {
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="main-content">
         <Outlet />
       </main>

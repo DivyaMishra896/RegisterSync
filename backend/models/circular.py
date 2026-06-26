@@ -1,7 +1,3 @@
-"""
-Circular model — represents an uploaded regulatory PDF document.
-"""
-
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, Text, DateTime
 from sqlalchemy.orm import relationship
@@ -14,11 +10,10 @@ class Circular(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     filename = Column(String(255), nullable=False)
     upload_date = Column(DateTime, default=datetime.utcnow)
-    source = Column(String(50), default="RBI")  # RBI, SEBI, etc.
+    source = Column(String(50), default="RBI")
     raw_text = Column(Text, default="")
-    status = Column(String(50), default="uploaded")  # uploaded, extracting, extracted, processed
+    status = Column(String(50), default="uploaded")
 
-    # Relationships
     rules = relationship("ExtractedRule", back_populates="circular", cascade="all, delete-orphan")
     tasks = relationship("MAPTask", back_populates="circular", cascade="all, delete-orphan")
 

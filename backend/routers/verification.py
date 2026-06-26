@@ -1,8 +1,3 @@
-"""
-Suraksha — Verification Router
-Endpoints for running the verification agent and viewing results.
-"""
-
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -15,10 +10,6 @@ router = APIRouter(prefix="/api/verify", tags=["Verification"])
 
 @router.post("/run")
 async def trigger_verification(db: Session = Depends(get_db)):
-    """
-    Trigger the verification agent to scan mock logs
-    and update task statuses.
-    """
     results = run_verification(db)
     return {
         "message": "Verification scan complete",
@@ -28,14 +19,12 @@ async def trigger_verification(db: Session = Depends(get_db)):
 
 @router.get("/summary")
 async def verification_summary(db: Session = Depends(get_db)):
-    """Get overall verification/compliance summary."""
     summary = get_verification_summary(db)
     return summary
 
 
 @router.get("/task/{task_id}")
 async def task_verification_detail(task_id: int, db: Session = Depends(get_db)):
-    """Get verification details and audit trail for a specific task."""
     task = db.query(MAPTask).filter(MAPTask.id == task_id).first()
     if not task:
         return {"error": "Task not found"}

@@ -1,8 +1,3 @@
-"""
-Suraksha — Reader Agent
-Analyzes PDF text, identifies regulatory sections, and summarizes the document.
-"""
-
 from services.agents.base_agent import BaseAgent
 from services.nlp_fallback import mock_read_circular
 
@@ -22,6 +17,6 @@ class ReaderAgent(BaseAgent):
 
     async def analyze(self, text: str) -> dict:
         result = await self.think(f"Analyze this regulatory text:\n\n{text}")
-        if not result: # Fallback to mock if empty
+        if not result:
             return mock_read_circular(text)
         return result

@@ -1,14 +1,3 @@
-"""
-Suraksha — Department Data (from Theme 2 Excel)
-Contains all 10 Business Verticals with 30 Sub-Verticals,
-their scope, regulators, advisories, and routing keywords.
-Hardcoded for fully offline operation — no Excel parsing at runtime.
-"""
-
-# ─────────────────────────────────────────────────────────────
-# Business Verticals — Master Data from theme_2.xlsx
-# ─────────────────────────────────────────────────────────────
-
 BUSINESS_VERTICALS = [
     {
         "name": "Digital Banking Services",
@@ -357,28 +346,22 @@ BUSINESS_VERTICALS = [
     }
 ]
 
-# ─────────────────────────────────────────────────────────────
-# Derived Data
-# ─────────────────────────────────────────────────────────────
 
-# Ordered list of department names (for round-robin)
 DEPARTMENT_NAMES = [v["name"] for v in BUSINESS_VERTICALS]
 
-# Department colors — curated palette for dark UI
 DEPARTMENT_COLORS = {
-    "Digital Banking Services":       "#3b82f6",   # Blue
-    "Cybersecurity Wing":             "#ef4444",   # Red
-    "IT Vertical":                    "#8b5cf6",   # Purple
-    "Procurement & Vendor Management":"#f59e0b",   # Amber
-    "Credit Card Vertical":          "#ec4899",   # Pink
-    "Payments Vertical":              "#06b6d4",   # Cyan
-    "Compliance Department":          "#10b981",   # Emerald
-    "Legal Department":               "#f97316",   # Orange
-    "Risk Management":                "#eab308",   # Yellow
-    "Internal Audit":                 "#6366f1",   # Indigo
+    "Digital Banking Services":       "#3b82f6",   
+    "Cybersecurity Wing":             "#ef4444",   
+    "IT Vertical":                    "#8b5cf6",   
+    "Procurement & Vendor Management":"#f59e0b",   
+    "Credit Card Vertical":          "#ec4899",    
+    "Payments Vertical":              "#06b6d4",   
+    "Compliance Department":          "#10b981",   
+    "Legal Department":               "#f97316",   
+    "Risk Management":                "#eab308",   
+    "Internal Audit":                 "#6366f1",   
 }
 
-# Department dim colors (for backgrounds)
 DEPARTMENT_DIM_COLORS = {
     "Digital Banking Services":       "rgba(59,130,246,0.12)",
     "Cybersecurity Wing":             "rgba(239,68,68,0.12)",
@@ -392,7 +375,6 @@ DEPARTMENT_DIM_COLORS = {
     "Internal Audit":                 "rgba(99,102,241,0.12)",
 }
 
-# Default owners per department
 DEPARTMENT_OWNERS = {
     "Digital Banking Services":       "Head of Digital Banking",
     "Cybersecurity Wing":             "CISO Office",
@@ -406,27 +388,20 @@ DEPARTMENT_OWNERS = {
     "Internal Audit":                 "Head of Internal Audit",
 }
 
-# ─────────────────────────────────────────────────────────────
-# Helper Functions
-# ─────────────────────────────────────────────────────────────
 
 def get_department_color(department: str) -> str:
-    """Get the display color for a department."""
     return DEPARTMENT_COLORS.get(department, "#6b7280")
 
 
 def get_department_dim_color(department: str) -> str:
-    """Get the dim background color for a department."""
     return DEPARTMENT_DIM_COLORS.get(department, "rgba(107,114,128,0.12)")
 
 
 def get_default_owner(department: str) -> str:
-    """Get the default owner/team for a department."""
     return DEPARTMENT_OWNERS.get(department, "Compliance Team")
 
 
 def get_sub_verticals(department: str) -> list:
-    """Get sub-verticals for a specific department."""
     for v in BUSINESS_VERTICALS:
         if v["name"] == department:
             return v["sub_verticals"]
@@ -434,7 +409,6 @@ def get_sub_verticals(department: str) -> list:
 
 
 def get_department_info(department: str) -> dict:
-    """Get full info for a department including sub-verticals and keywords."""
     for v in BUSINESS_VERTICALS:
         if v["name"] == department:
             return v
@@ -442,7 +416,6 @@ def get_department_info(department: str) -> dict:
 
 
 def get_all_regulators() -> list:
-    """Get a unique list of all regulators."""
     regulators = set()
     for v in BUSINESS_VERTICALS:
         for sv in v["sub_verticals"]:
@@ -452,16 +425,13 @@ def get_all_regulators() -> list:
 
 
 def match_sub_vertical(department: str, text: str) -> dict | None:
-    """Find the best-matching sub-vertical within a department for the given text."""
     text_lower = text.lower()
     best_match = None
     best_score = 0
 
     for sv in get_sub_verticals(department):
-        # Score based on scope keywords appearing in text
         scope_words = sv["scope"].lower().split()
         score = sum(1 for w in scope_words if w in text_lower)
-        # Boost if sub-vertical name appears
         if sv["name"].lower().replace("(", "").replace(")", "") in text_lower:
             score += 5
         if score > best_score:

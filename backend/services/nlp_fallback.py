@@ -1,9 +1,3 @@
-"""
-Suraksha — NLP Fallback Methods
-Provides regex, keyword matching, and TF-IDF logic when LLM_MODE="mock".
-Uses the 10 Business Verticals from Theme 2.
-"""
-
 import re
 import json
 from datetime import date, timedelta
@@ -11,10 +5,9 @@ try:
     from sklearn.feature_extraction.text import TfidfVectorizer
     from sklearn.metrics.pairwise import cosine_similarity
 except ImportError:
-    pass # Handled gracefully if not installed
+    pass  # Fallback
 
 def mock_read_circular(text: str) -> dict:
-    """Mock reader agent using regex."""
     paragraphs = text.split('\n\n')
     summary = "Mock summary of regulatory text."
     if paragraphs:
@@ -29,7 +22,6 @@ def mock_read_circular(text: str) -> dict:
     }
 
 def mock_extract_rules(sections: list) -> list:
-    """Mock extractor agent — uses the 10 Business Verticals from Theme 2."""
     return [
         {
             "rule_id": "R-001",
@@ -70,12 +62,10 @@ def mock_extract_rules(sections: list) -> list:
     ]
 
 def mock_check_conflicts(new_rules: list, existing_rules: list) -> list:
-    """Mock conflict agent using TF-IDF."""
     try:
         if not new_rules or not existing_rules:
             return []
 
-        # Simple TF-IDF cosine similarity
         vectorizer = TfidfVectorizer(stop_words='english')
         
         new_texts = [r.get("title", "") + " " + r.get("description", "") for r in new_rules]
@@ -84,7 +74,6 @@ def mock_check_conflicts(new_rules: list, existing_rules: list) -> list:
         all_texts = new_texts + existing_texts
         tfidf_matrix = vectorizer.fit_transform(all_texts)
         
-        # Calculate similarity between new and existing
         new_matrix = tfidf_matrix[:len(new_rules)]
         existing_matrix = tfidf_matrix[len(new_rules):]
         
@@ -93,7 +82,7 @@ def mock_check_conflicts(new_rules: list, existing_rules: list) -> list:
         conflicts = []
         for i, new_rule in enumerate(new_rules):
             for j, existing_rule in enumerate(existing_rules):
-                if similarity[i][j] > 0.4: # Threshold
+                if similarity[i][j] > 0.4:
                     conflicts.append({
                         "new_rule_id": new_rule.get("rule_id", "Unknown"),
                         "new_rule_title": new_rule.get("title", "Unknown"),

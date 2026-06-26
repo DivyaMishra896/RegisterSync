@@ -33,7 +33,6 @@ export default function CircularsPage() {
       </div>
 
       <div className="page-content">
-        {/* Section Label */}
         <div className="section-label">
           <span>Document Registry</span>
         </div>

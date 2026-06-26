@@ -9,7 +9,6 @@ export default function ExtractionView({ circularId, isStreaming, onComplete }) 
   const [error, setError] = useState(null);
   const logEndRef = useRef(null);
 
-  // Auto-scroll logs
   useEffect(() => {
     logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [logs]);
@@ -34,13 +33,12 @@ export default function ExtractionView({ circularId, isStreaming, onComplete }) 
 
     eventSource.addEventListener('complete', async (e) => {
       isFinished = true;
-      eventSource.close(); // Close immediately to prevent reconnection/error events
+      eventSource.close(); // Prevent reconnect
       
       try {
         const stats = JSON.parse(e.data);
         setLogs(prev => [...prev, { agent: 'System', thought: 'Pipeline complete. Fetching final results...' }]);
         
-        // Fetch the generated data
         const [rulesRes, conflictsRes, tasksRes] = await Promise.all([
           getRules(circularId),
           getConflicts(circularId),
@@ -62,9 +60,8 @@ export default function ExtractionView({ circularId, isStreaming, onComplete }) 
     });
 
     eventSource.addEventListener('error', (e) => {
-      if (isFinished) return; // Ignore disconnect errors after we already finished
+      if (isFinished) return; // Already finished
       
-      // If data is passed in the error event
       let msg = 'SSE connection error (Server may have closed the connection)';
       if (e.data) msg = e.data;
       setError(msg);
@@ -79,7 +76,6 @@ export default function ExtractionView({ circularId, isStreaming, onComplete }) 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      {/* Agent Reasoning Log Panel */}
       <div className="card" style={{ 
         background: '#1C1C1E', 
         color: '#E5E5EA', 
@@ -128,7 +124,6 @@ export default function ExtractionView({ circularId, isStreaming, onComplete }) 
         </div>
       </div>
 
-      {/* Results Section */}
       {extractionData && (
         <ExtractionResults data={extractionData} />
       )}
@@ -138,25 +133,22 @@ export default function ExtractionView({ circularId, isStreaming, onComplete }) 
 
 function getAgentColor(agent) {
   switch(agent) {
-    case 'Orchestrator': return '#B8860B'; // gold — orchestrator is the conductor
-    case 'Reader': return '#569cd6'; // blue
-    case 'Extractor': return '#4ec9b0'; // teal
-    case 'Conflict': return '#d16969'; // red
-    case 'Router': return '#ce9178'; // orange
+    case 'Orchestrator': return '#B8860B';
+    case 'Reader': return '#569cd6';
+    case 'Extractor': return '#4ec9b0';
+    case 'Conflict': return '#d16969';
+    case 'Router': return '#ce9178';
     default: return '#8E8E93';
   }
 }
 
-// Extracted the results UI into a sub-component to keep it clean
 function ExtractionResults({ data }) {
   return (
     <div>
-      {/* Section Label */}
       <div className="section-label">
         <span>Extraction Results</span>
       </div>
 
-      {/* Summary Stats */}
       <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: '28px' }}>
         <div className="stat-card-lg">
           <div className="stat-icon" style={{ background: 'var(--accent-blue-dim)', color: 'var(--accent-blue)' }}>📋</div>
@@ -177,7 +169,6 @@ function ExtractionResults({ data }) {
         </div>
       </div>
 
-      {/* Conflicts / Regulatory Diff */}
       {data.conflicts && data.conflicts.length > 0 && (
         <div style={{ marginBottom: '28px' }}>
           <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 600, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -199,7 +190,6 @@ function ExtractionResults({ data }) {
                 <strong>Agent Analysis:</strong> {conflict.reason}
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: 'var(--border-color)' }}>
-                {/* Old Rule */}
                 <div style={{ padding: '16px', background: 'var(--bg-secondary)' }}>
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', fontWeight: 500, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '8px' }}>
                     EXISTING RULE (OLD)
@@ -210,7 +200,6 @@ function ExtractionResults({ data }) {
                   </div>
                 </div>
                 
-                {/* New Rule */}
                 <div style={{ padding: '16px', background: 'var(--bg-secondary)' }}>
                   <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', fontWeight: 500, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '8px' }}>
                     NEW CIRCULAR (NEW)
@@ -226,7 +215,6 @@ function ExtractionResults({ data }) {
         </div>
       )}
 
-      {/* Rules Grid */}
       <div className="extraction-container">
         <div className="extraction-panel">
           <div className="extraction-panel-header">
@@ -257,7 +245,6 @@ function ExtractionResults({ data }) {
           </div>
         </div>
 
-        {/* Generated Tasks */}
         <div className="extraction-panel">
           <div className="extraction-panel-header">
             <Sparkles size={16} style={{ color: 'var(--accent-gold)' }} />

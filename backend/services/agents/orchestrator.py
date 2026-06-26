@@ -1,9 +1,3 @@
-"""
-Suraksha — Orchestrator Agent
-Coordinates specialist agents and maintains the reasoning trail.
-Can yield streaming SSE events or return the final result.
-"""
-
 import json
 from services.agents.reader_agent import ReaderAgent
 from services.agents.extractor_agent import ExtractorAgent
@@ -18,23 +12,17 @@ class OrchestratorAgent:
         self.router = RouterAgent()
 
     async def run_extraction_pipeline(self, text_chunks: list, circular_id: int, existing_rules: list = None):
-        """
-        Runs the full pipeline. Yields dicts representing SSE events.
-        The last event will have type 'final_result'.
-        """
         if existing_rules is None:
             existing_rules = []
             
         combined_text = "\n\n".join(text_chunks)
         
-        # 1. Orchestrator Starts
         yield {
             "type": "thought",
             "agent": "Orchestrator",
             "thought": f"Starting extraction pipeline for Circular #{circular_id}."
         }
         
-        # 2. Reader Agent
         yield {
             "type": "thought",
             "agent": "Reader",
@@ -48,7 +36,6 @@ class OrchestratorAgent:
             "thought": f"Identified {len(reader_result.get('regulatory_sections', []))} regulatory sections. Subject: {reader_result.get('subject', 'Unknown')}."
         }
         
-        # 3. Extractor Agent
         yield {
             "type": "thought",
             "agent": "Extractor",
@@ -62,7 +49,6 @@ class OrchestratorAgent:
             "thought": f"Successfully extracted {len(rules)} actionable rules."
         }
         
-        # 4. Conflict Agent
         if existing_rules:
             yield {
                 "type": "thought",
@@ -78,8 +64,6 @@ class OrchestratorAgent:
         else:
             conflicts = []
             
-        # 5. Router Agent (optional step for reasoning logging, as MAP generation handles it in bulk)
-        # We can simulate the router assigning departments for the first rule just to show reasoning.
         if rules:
             first_rule = rules[0]
             yield {
@@ -94,7 +78,6 @@ class OrchestratorAgent:
                 "thought": f"Assigned to {', '.join(router_res.get('departments', []))} because: {router_res.get('reasoning', 'Standard routing')}."
             }
         
-        # Final yield
         yield {
             "type": "final_result",
             "data": {

@@ -1,7 +1,3 @@
-"""
-MAPTask model — Measurable Action Point generated from an extracted rule.
-"""
-
 import json
 from datetime import datetime, date
 from sqlalchemy import Column, Integer, String, Text, Date, DateTime, ForeignKey
@@ -15,24 +11,23 @@ class MAPTask(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     rule_id = Column(Integer, ForeignKey("extracted_rules.id"), nullable=True)
     circular_id = Column(Integer, ForeignKey("circulars.id"), nullable=False)
-    task_ref = Column(String(20))  # "MAP-001"
+    task_ref = Column(String(20))
     title = Column(String(500))
     description = Column(Text)
-    department = Column(String(100))  # IT Security, Risk Management, Operations
+    department = Column(String(100))
     priority = Column(String(20), default="Medium")
     deadline = Column(Date, nullable=True)
-    status = Column(String(50), default="Pending")  # Pending, Verified, Failed, Partially Done
+    status = Column(String(50), default="Pending")
     owner = Column(String(200), default="")
     created_at = Column(DateTime, default=datetime.utcnow)
     verified_at = Column(DateTime, nullable=True)
     evidence_link = Column(String(500), nullable=True)
-    audit_trail = Column(Text, default="[]")  # JSON array of verification events
-    sub_vertical = Column(String(200), default="")      # Sub-vertical assignment
-    regulator = Column(String(100), default="")          # Primary regulator (RBI, CERT-In, etc.)
-    advisory = Column(String(500), default="")           # Specific advisory/regulation name
-    routing_reason = Column(Text, default="")            # Why this dept was assigned
+    audit_trail = Column(Text, default="[]")
+    sub_vertical = Column(String(200), default="")
+    regulator = Column(String(100), default="")
+    advisory = Column(String(500), default="")
+    routing_reason = Column(Text, default="")
 
-    # Relationships
     rule = relationship("ExtractedRule", back_populates="tasks")
     circular = relationship("Circular", back_populates="tasks")
 

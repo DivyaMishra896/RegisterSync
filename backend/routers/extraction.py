@@ -1,8 +1,3 @@
-"""
-Suraksha — Extraction Router
-Triggers LLM rule extraction and returns results. Supports SSE streaming.
-"""
-
 import json
 from datetime import datetime, date
 from fastapi import APIRouter, Depends, HTTPException
@@ -19,11 +14,9 @@ from services.agents.orchestrator import OrchestratorAgent
 
 router = APIRouter(prefix="/api/extract", tags=["Extraction"])
 
+
 @router.get("/{circular_id}/stream")
 async def extract_rules_stream(circular_id: int):
-    """
-    Trigger LLM extraction pipeline for a circular and stream the reasoning via SSE.
-    """
     async def event_generator():
         db = SessionLocal()
         try:
@@ -39,17 +32,14 @@ async def extract_rules_stream(circular_id: int):
             circular.status = "extracting"
             db.commit()
 
-            # 1. Chunk text
             chunks = chunk_text(circular.raw_text)
 
-            # 2. Get existing rules for conflict check
             existing_rules_db = db.query(ExtractedRule).all()
             existing_rules = [
                 {"rule_id": r.rule_id, "title": r.title, "description": r.description} 
                 for r in existing_rules_db
             ]
 
-            # 3. Run Orchestrator Pipeline
             orchestrator = OrchestratorAgent()
             final_data = None
 
@@ -62,7 +52,6 @@ async def extract_rules_stream(circular_id: int):
                 elif step["type"] == "final_result":
                     final_data = step["data"]
 
-            # 4. Save results to DB
             rules_data = final_data.get("rules", [])
             conflicts_data = final_data.get("conflicts", [])
 
@@ -92,7 +81,6 @@ async def extract_rules_stream(circular_id: int):
             for rule in saved_rules:
                 db.refresh(rule)
 
-            # Apply conflict flags
             if conflicts_data:
                 conflict_map = {}
                 for conflict in conflicts_data:
@@ -107,7 +95,6 @@ async def extract_rules_stream(circular_id: int):
                         rule.conflict_details = json.dumps(conflict_map[rule.rule_id])
                 db.commit()
 
-            # Generate MAP tasks
             tasks = generate_maps_from_rules(db, circular_id, saved_rules)
 
             circular.status = "processed"
@@ -133,7 +120,6 @@ async def extract_rules_stream(circular_id: int):
 
 @router.get("/{circular_id}/rules")
 async def get_rules(circular_id: int, db: Session = Depends(get_db)):
-    """Get extracted rules for a circular."""
     rules = db.query(ExtractedRule).filter(
         ExtractedRule.circular_id == circular_id
     ).all()
@@ -142,7 +128,6 @@ async def get_rules(circular_id: int, db: Session = Depends(get_db)):
 
 @router.get("/{circular_id}/conflicts")
 async def get_conflicts(circular_id: int, db: Session = Depends(get_db)):
-    """Get conflict details for rules in a circular."""
     rules = db.query(ExtractedRule).filter(
         ExtractedRule.circular_id == circular_id,
         ExtractedRule.has_conflict == True

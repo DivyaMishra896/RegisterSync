@@ -32,7 +32,6 @@ export function PriorityBadge({ priority }) {
   );
 }
 
-// Maps full department names to CSS badge classes
 const DEPT_BADGE_MAP = {
   'Digital Banking Services': 'badge-dept-dbs',
   'Cybersecurity Wing': 'badge-dept-csw',

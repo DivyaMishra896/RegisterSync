@@ -33,10 +33,8 @@ export default function DashboardPage() {
   }, []);
 
   const handleVerificationComplete = async (results) => {
-    // Refresh tasks to show status updates
     await fetchData();
 
-    // Add flash animations to updated tasks
     if (results?.details) {
       setTasks(prev => prev.map(task => {
         const detail = results.details.find(d => d.task_ref === task.task_ref);
@@ -51,7 +49,6 @@ export default function DashboardPage() {
         return task;
       }));
 
-      // Clear animations after 2 seconds
       setTimeout(() => {
         setTasks(prev => prev.map(task => ({
           ...task,
@@ -131,12 +128,10 @@ export default function DashboardPage() {
       </div>
 
       <div className="page-content">
-        {/* Section Label */}
         <div className="section-label">
           <span>Overview</span>
         </div>
 
-        {/* Stats Overview */}
         <div className="stats-grid">
           <div className="stat-card-lg">
             <div className="stat-icon" style={{ background: 'var(--accent-blue-dim)', color: 'var(--accent-blue)' }}>
@@ -189,12 +184,10 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Section Label */}
         <div className="section-label">
           <span>Task Board</span>
         </div>
 
-        {/* Filter Bar */}
         <div className="filter-bar">
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-tertiary)', marginRight: '4px', textTransform: 'uppercase', letterSpacing: '0.12em' }}>Filter:</span>
           {['all', 'Pending', 'Verified', 'Failed', 'Partially Done'].map(filter => (
@@ -220,10 +213,8 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Task Board */}
         <TaskBoard tasks={filteredTasks} />
 
-        {/* Impact Charts */}
         {showCharts && (
           <div style={{ marginTop: '32px' }}>
             <div className="section-label">
@@ -233,7 +224,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Verification Agent */}
         <div style={{ marginTop: '32px' }}>
           <div className="section-label">
             <span>Verification</span>

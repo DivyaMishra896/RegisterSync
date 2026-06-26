@@ -23,7 +23,6 @@ export default function TaskCard({ task, onStatusFlip }) {
         </div>
       </div>
 
-      {/* Sub-vertical & Regulator info */}
       {(task.sub_vertical || task.regulator) && (
         <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
           {task.sub_vertical && (
@@ -57,7 +56,6 @@ export default function TaskCard({ task, onStatusFlip }) {
         )}
       </div>
 
-      {/* Routing reason tooltip */}
       {task.routing_reason && (
         <div style={{
           marginTop: '8px',

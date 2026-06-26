@@ -1,8 +1,3 @@
-"""
-Suraksha — Conflict Agent
-Compares new rules against existing rules and finds contradictions.
-"""
-
 import json
 from services.agents.base_agent import BaseAgent
 from services.nlp_fallback import mock_check_conflicts

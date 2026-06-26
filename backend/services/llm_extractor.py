@@ -1,17 +1,9 @@
-"""
-Suraksha — LLM Extractor Service
-Uses Ollama (or mock) to extract structured rules from regulatory text.
-Supports both local AI calls and hardcoded mock responses for demo.
-Fully offline — no external API keys needed.
-"""
-
 import json
 import asyncio
 from datetime import date, timedelta
 from config import settings
 
-# Mock response for demo mode — realistic RBI circular extraction
-# Uses the 10 Business Verticals from Theme 2
+
 MOCK_EXTRACTION_RESPONSE = {
     "rules": [
         {
@@ -91,30 +83,15 @@ MOCK_EXTRACTION_RESPONSE = {
 
 
 async def extract_rules_from_text(text_chunks: list[str], circular_id: int) -> dict:
-    """
-    Extract structured rules from regulatory text using local LLM or mock.
-
-    Args:
-        text_chunks: List of text chunks from the PDF
-        circular_id: ID of the circular being processed
-
-    Returns:
-        Dictionary with extracted rules
-    """
     if settings.LLM_MODE == "mock":
-        # Simulate processing delay for realistic demo
         await asyncio.sleep(2)
         return MOCK_EXTRACTION_RESPONSE
 
-    # Ollama mode — handled by the Orchestrator Agent pipeline
-    # This function is kept for backward compatibility but the main
-    # extraction path now goes through the Orchestrator Agent via SSE streaming
     await asyncio.sleep(1)
     return MOCK_EXTRACTION_RESPONSE
 
 
 def validate_extraction(data: dict) -> tuple[bool, str]:
-    """Validate the structure of extracted rules."""
     if "rules" not in data:
         return False, "Missing 'rules' key"
 

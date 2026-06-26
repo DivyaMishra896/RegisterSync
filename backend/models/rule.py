@@ -1,7 +1,3 @@
-"""
-ExtractedRule model — represents a rule extracted from a circular by the LLM.
-"""
-
 import json
 from datetime import date
 from sqlalchemy import Column, Integer, String, Text, Date, Boolean, ForeignKey
@@ -14,17 +10,16 @@ class ExtractedRule(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     circular_id = Column(Integer, ForeignKey("circulars.id"), nullable=False)
-    rule_id = Column(String(20))  # "R-001"
+    rule_id = Column(String(20))
     title = Column(String(500))
     description = Column(Text)
-    affected_departments = Column(Text, default="[]")  # JSON array
+    affected_departments = Column(Text, default="[]")
     deadline = Column(Date, nullable=True)
-    priority = Column(String(20), default="Medium")  # High, Medium, Low
+    priority = Column(String(20), default="Medium")
     estimated_effort_days = Column(Integer, default=7)
     has_conflict = Column(Boolean, default=False)
-    conflict_details = Column(Text, default=None)  # JSON
+    conflict_details = Column(Text, default=None)
 
-    # Relationships
     circular = relationship("Circular", back_populates="rules")
     tasks = relationship("MAPTask", back_populates="rule", cascade="all, delete-orphan")
 

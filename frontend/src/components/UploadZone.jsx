@@ -18,7 +18,6 @@ export default function UploadZone({ onUploadComplete }) {
     setError(null);
     setSuccess(null);
 
-    // Simulate progress
     const progressInterval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 90) {

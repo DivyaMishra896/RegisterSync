@@ -1,8 +1,3 @@
-"""
-Suraksha — Verifier Agent
-Checks system logs to verify task completion using LLM reasoning.
-"""
-
 from services.agents.base_agent import BaseAgent
 
 class VerifierAgent(BaseAgent):
@@ -27,7 +22,6 @@ class VerifierAgent(BaseAgent):
         result = await self.think(prompt)
         
         if not result or "status" not in result:
-            # Fallback handled in the calling service
             return {"status": "Unknown", "reasoning": "Fallback to manual verification."}
             
         return result

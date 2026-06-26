@@ -1,10 +1,3 @@
-"""
-Suraksha — Verification Agent Service
-The "Game-Changer" module: reads mock system logs to auto-verify task compliance.
-Flips task status from Pending → Verified / Failed / Partially Done.
-Generates audit trail entries with timestamps and evidence links.
-"""
-
 import json
 import os
 from datetime import datetime
@@ -15,7 +8,6 @@ from config import settings
 
 
 def load_mock_logs() -> dict:
-    """Load all mock log files and index by task reference."""
     logs_dir = settings.MOCK_LOGS_DIR
     all_logs = {}
 
@@ -33,17 +25,8 @@ def load_mock_logs() -> dict:
 
 
 def run_verification(db: Session) -> dict:
-    """
-    Run the verification agent against all pending tasks.
-    Checks mock logs for evidence of task completion.
-
-    Returns:
-        Summary of verification results
-    """
-    # Load mock logs
     logs = load_mock_logs()
 
-    # Get all pending tasks
     pending_tasks = db.query(MAPTask).filter(
         MAPTask.status.in_(["Pending", "In Progress"])
     ).all()
@@ -129,7 +112,6 @@ def run_verification(db: Session) -> dict:
 
 
 def get_verification_summary(db: Session) -> dict:
-    """Get overall verification statistics."""
     all_tasks = db.query(MAPTask).all()
 
     summary = {

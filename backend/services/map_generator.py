@@ -1,9 +1,3 @@
-"""
-Suraksha — MAP Generator Service
-Converts extracted rules into Measurable Action Points (MAPs).
-Uses hybrid keyword-filter + round-robin for department assignment.
-"""
-
 import json
 from datetime import datetime
 from sqlalchemy.orm import Session
@@ -15,22 +9,16 @@ from services.department_data import get_default_owner
 
 
 def generate_maps_from_rules(db: Session, circular_id: int, rules: list[ExtractedRule]) -> list[MAPTask]:
-    """
-    Generate MAP tasks from extracted rules.
-    Each rule becomes one primary task, assigned via hybrid keyword-filter + round-robin.
-    """
     tasks = []
     task_counter = 1
 
     for rule in rules:
-        # Use the hybrid assigner: keyword-filter + round-robin
         combined_text = f"{rule.title} {rule.description}"
         assignment = CircularAssigner.assign(combined_text)
 
         dept = assignment["department"]
         task_ref = f"MAP-{task_counter:03d}"
 
-        # Generate actionable task title and description
         task_title, task_desc = _create_task_details(rule, dept)
 
         task = MAPTask(
@@ -64,7 +52,6 @@ def generate_maps_from_rules(db: Session, circular_id: int, rules: list[Extracte
 
     db.commit()
 
-    # Refresh to get IDs
     for task in tasks:
         db.refresh(task)
 
@@ -72,7 +59,6 @@ def generate_maps_from_rules(db: Session, circular_id: int, rules: list[Extracte
 
 
 def _create_task_details(rule: ExtractedRule, department: str) -> tuple[str, str]:
-    """Generate actionable task title and description from rule and department."""
     title = f"[{department}] {rule.title}"
 
     description = (

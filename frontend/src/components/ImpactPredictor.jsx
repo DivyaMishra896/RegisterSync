@@ -54,14 +54,12 @@ export default function ImpactPredictor({ stats, tasks }) {
     );
   }
 
-  // Effort by department data
   const effortData = Object.entries(stats.effort_by_department || {}).map(([dept, effort]) => ({
     department: dept,
     Effort: effort,
     fill: DEPT_COLORS[dept] || '#8A8A8A',
   }));
 
-  // Tasks by department
   const taskCountData = Object.entries(stats.by_department || {}).map(([dept, data]) => ({
     department: dept,
     Total: data.total,
@@ -70,7 +68,6 @@ export default function ImpactPredictor({ stats, tasks }) {
     Failed: data.failed,
   }));
 
-  // Status distribution for pie chart
   const statusData = Object.entries(stats.by_status || {}).map(([status, count]) => ({
     name: status,
     value: count,
@@ -79,7 +76,6 @@ export default function ImpactPredictor({ stats, tasks }) {
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-      {/* Effort by Department */}
       <div className="chart-container">
         <div className="chart-title">⏱ Estimated Effort by Department</div>
         <ResponsiveContainer width="100%" height={260}>
@@ -107,7 +103,6 @@ export default function ImpactPredictor({ stats, tasks }) {
         </ResponsiveContainer>
       </div>
 
-      {/* Status Distribution */}
       <div className="chart-container">
         <div className="chart-title">📈 Compliance Status</div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -139,7 +134,6 @@ export default function ImpactPredictor({ stats, tasks }) {
         </div>
       </div>
 
-      {/* Task Count by Department */}
       <div className="chart-container" style={{ gridColumn: 'span 2' }}>
         <div className="chart-title">🏢 Tasks by Department & Status</div>
         <ResponsiveContainer width="100%" height={260}>

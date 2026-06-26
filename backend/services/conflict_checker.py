@@ -1,10 +1,3 @@
-"""
-Suraksha — Conflict Checker Service
-Detects conflicts between new rules and existing rules in the database.
-Uses semantic comparison to flag contradictions.
-Fully offline — uses TF-IDF or mock data.
-"""
-
 import json
 import asyncio
 from sqlalchemy.orm import Session
@@ -12,7 +5,6 @@ from models.rule import ExtractedRule
 from config import settings
 
 
-# Pre-built conflict scenario for demo (old rule from a "2022 circular")
 MOCK_EXISTING_RULES = [
     {
         "rule_id": "HIST-001",
@@ -30,7 +22,6 @@ MOCK_EXISTING_RULES = [
     }
 ]
 
-# Pre-built conflict results for demo
 MOCK_CONFLICT_RESULTS = [
     {
         "new_rule_id": "R-001",
@@ -56,27 +47,15 @@ MOCK_CONFLICT_RESULTS = [
 
 
 async def check_conflicts(new_rules: list[dict], db: Session) -> list[dict]:
-    """
-    Check for conflicts between new rules and existing rules.
-
-    Args:
-        new_rules: List of newly extracted rule dictionaries
-        db: Database session
-
-    Returns:
-        List of conflict reports
-    """
     if settings.LLM_MODE == "mock":
-        await asyncio.sleep(1.5)  # Simulate processing
+        await asyncio.sleep(1.5)
         return MOCK_CONFLICT_RESULTS
 
-    # Ollama mode: compare against existing rules in DB
     existing_rules = db.query(ExtractedRule).all()
 
     if not existing_rules:
         return []
 
-    # Use TF-IDF for semantic comparison (offline)
     try:
         from sklearn.feature_extraction.text import TfidfVectorizer
         from sklearn.metrics.pairwise import cosine_similarity
@@ -118,7 +97,6 @@ async def check_conflicts(new_rules: list[dict], db: Session) -> list[dict]:
 
 
 def apply_conflict_flags(db: Session, rules: list[ExtractedRule], conflicts: list[dict]):
-    """Update rule records with conflict information."""
     conflict_map = {}
     for conflict in conflicts:
         rule_id = conflict.get("new_rule_id")

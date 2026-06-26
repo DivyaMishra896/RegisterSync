@@ -4,7 +4,6 @@ import {
   Banknote, FileCheck, Scale, BarChart3, Search
 } from 'lucide-react';
 
-// 10 Business Verticals from Theme 2
 const DEPT_CONFIG = {
   'Digital Banking Services': {
     icon: <Monitor size={14} />,
@@ -61,12 +60,10 @@ const DEPT_CONFIG = {
 const ALL_DEPARTMENTS = Object.keys(DEPT_CONFIG);
 
 export default function TaskBoard({ tasks }) {
-  // Only show departments that have tasks assigned
   const activeDepartments = ALL_DEPARTMENTS.filter(
     dept => tasks.some(task => task.department === dept)
   );
 
-  // If no active departments, show all departments
   const departments = activeDepartments.length > 0 ? activeDepartments : ALL_DEPARTMENTS;
 
   const getTasksByDepartment = (dept) =>

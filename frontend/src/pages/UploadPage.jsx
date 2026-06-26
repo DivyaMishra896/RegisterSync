@@ -8,7 +8,7 @@ export default function UploadPage() {
   const navigate = useNavigate();
   const [circularId, setCircularId] = useState(null);
   const [extracting, setExtracting] = useState(false);
-  const [step, setStep] = useState('upload'); // upload, extract, done
+  const [step, setStep] = useState('upload');
 
   const handleUploadComplete = (data) => {
     setCircularId(data.circular_id);
@@ -38,7 +38,6 @@ export default function UploadPage() {
       </div>
 
       <div className="page-content">
-        {/* Step Indicator */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -54,12 +53,10 @@ export default function UploadPage() {
           <StepIndicator number={3} label="Review & Dashboard" active={step === 'done'} completed={false} />
         </div>
 
-        {/* Upload Step */}
         {step === 'upload' && (
           <UploadZone onUploadComplete={handleUploadComplete} />
         )}
 
-        {/* Extract Step Start */}
         {step === 'extract' && !extracting && (
           <div className="card" style={{ textAlign: 'center', padding: '56px 40px', borderTop: '2px solid var(--accent-gold)' }}>
             <Sparkles size={44} style={{ color: 'var(--accent-gold)', margin: '0 auto 20px', display: 'block' }} />
@@ -78,7 +75,6 @@ export default function UploadPage() {
           </div>
         )}
 
-        {/* Extraction View (Streaming & Results) */}
         {(extracting || step === 'done') && circularId && (
           <ExtractionView 
             circularId={circularId} 
@@ -87,7 +83,6 @@ export default function UploadPage() {
           />
         )}
 
-        {/* Go to Dashboard */}
         {step === 'done' && (
           <div style={{ marginTop: '28px', textAlign: 'center' }}>
             <button className="btn btn-primary btn-lg" onClick={() => navigate('/dashboard')}>

@@ -84,7 +84,6 @@ export default function VerificationPanel({ onVerificationComplete }) {
 
       {results && (
         <>
-          {/* Stats */}
           <div className="verification-stats">
             <div className="stat-card">
               <div className="stat-value" style={{ color: 'var(--text-primary)' }}>{results.total_checked}</div>
@@ -104,7 +103,6 @@ export default function VerificationPanel({ onVerificationComplete }) {
             </div>
           </div>
 
-          {/* Timeline */}
           <div style={{ fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 600, marginBottom: '14px' }}>
             Verification Log
           </div>

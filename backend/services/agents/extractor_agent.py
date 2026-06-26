@@ -1,9 +1,3 @@
-"""
-Suraksha — Extractor Agent
-Extracts structured rules from regulatory sections.
-Uses 10 Business Verticals from Theme 2.
-"""
-
 import json
 from services.agents.base_agent import BaseAgent
 from services.nlp_fallback import mock_extract_rules

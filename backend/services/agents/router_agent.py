@@ -1,9 +1,3 @@
-"""
-Suraksha — Router Agent
-Assigns rules to departments with reasoning.
-Uses 10 Business Verticals from Theme 2.
-"""
-
 import json
 from services.agents.base_agent import BaseAgent
 from services.department_router import route_rule_to_departments
@@ -27,7 +21,6 @@ class RouterAgent(BaseAgent):
         result = await self.think(prompt)
         
         if not result or "departments" not in result:
-            # Fallback
             depts = route_rule_to_departments(title, description)
             return {"departments": depts, "reasoning": "Assigned using fallback keyword matching."}
             
