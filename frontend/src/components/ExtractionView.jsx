@@ -7,6 +7,7 @@ export default function ExtractionView({ circularId, isStreaming, onComplete }) 
   const [logs, setLogs] = useState([]);
   const [extractionData, setExtractionData] = useState(null);
   const [error, setError] = useState(null);
+  const [nonRegulatory, setNonRegulatory] = useState(false);
   const logEndRef = useRef(null);
 
   useEffect(() => {
@@ -30,6 +31,17 @@ export default function ExtractionView({ circularId, isStreaming, onComplete }) 
     });
 
     let isFinished = false;
+
+    eventSource.addEventListener('non_regulatory', (e) => {
+      isFinished = true;
+      eventSource.close();
+      setNonRegulatory(true);
+      setLogs(prev => [...prev, {
+        agent: 'Orchestrator',
+        thought: 'Document rejected: not a regulatory circular. No rules will be extracted.',
+      }]);
+      if (onComplete) onComplete();
+    });
 
     eventSource.addEventListener('complete', async (e) => {
       isFinished = true;
@@ -76,6 +88,30 @@ export default function ExtractionView({ circularId, isStreaming, onComplete }) 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      {nonRegulatory && (
+        <div style={{
+          padding: '20px 24px',
+          borderRadius: 'var(--radius-lg)',
+          background: 'rgba(198, 40, 40, 0.05)',
+          border: '1px solid var(--accent-red-dim)',
+          borderLeft: '3px solid var(--accent-red)',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '14px',
+        }}>
+          <span style={{ fontSize: '22px', flexShrink: 0 }}>⚠️</span>
+          <div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 600, color: 'var(--accent-red)', marginBottom: '4px' }}>
+              Non-Regulatory Document
+            </div>
+            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+              This PDF does not appear to be an RBI/SEBI regulatory circular.
+              No rules or MAP tasks were generated.
+              Please upload a genuine regulatory circular.
+            </div>
+          </div>
+        </div>
+      )}
       <div className="card" style={{ 
         background: '#1C1C1E', 
         color: '#E5E5EA', 

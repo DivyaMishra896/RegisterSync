@@ -17,11 +17,25 @@ def _build_engine():
         separator = "&" if "?" in url else "?"
         url = f"{url}{separator}sslmode=require"
 
-    return create_engine(
+    engine = create_engine(
         url,
         connect_args=connect_args,
-        pool_pre_ping=True,  # Reconnect
+        pool_pre_ping=True,  # Reconnect on stale connections
     )
+
+    # Enable WAL mode + busy timeout for SQLite so concurrent readers
+    # (dashboard) are never blocked by a long extraction write.
+    if url.startswith("sqlite"):
+        from sqlalchemy import event, text
+
+        @event.listens_for(engine, "connect")
+        def set_sqlite_pragmas(dbapi_conn, _):
+            cursor = dbapi_conn.cursor()
+            cursor.execute("PRAGMA journal_mode=WAL")   # Allow concurrent reads
+            cursor.execute("PRAGMA busy_timeout=30000") # Wait up to 30s instead of failing
+            cursor.close()
+
+    return engine
 
 
 engine = _build_engine()

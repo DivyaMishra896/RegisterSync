@@ -7,7 +7,37 @@ try:
 except ImportError:
     pass  # Fallback
 
+# Keywords that strongly indicate a genuine regulatory/compliance document
+_REGULATORY_KEYWORDS = [
+    "rbi", "sebi", "irdai", "nabard", "circular", "directive", "regulation",
+    "compliance", "shall", "must", "mandatory", "prescribed", "guidelines",
+    "banks", "banking", "financial institution", "regulated entity",
+    "master direction", "notification", "gazette", "prudential", "statutory",
+    "penalty", "enforcement", "deadline", "submit", "report to", "supervisory",
+    "capital adequacy", "kyc", "aml", "fraud", "npa", "nbfc", "payment system",
+]
+_MIN_KEYWORD_HITS = 3  # document must contain at least this many distinct keywords
+
+
+def is_regulatory_document(text: str) -> bool:
+    """Returns True only if the text looks like a genuine regulatory circular."""
+    lower = text.lower()
+    hits = sum(1 for kw in _REGULATORY_KEYWORDS if kw in lower)
+    return hits >= _MIN_KEYWORD_HITS
+
+
 def mock_read_circular(text: str) -> dict:
+    if not is_regulatory_document(text):
+        # Return empty regulatory_sections so the pipeline produces zero rules
+        return {
+            "subject": "Non-Regulatory Document",
+            "reference": "",
+            "summary": "This document does not appear to be a regulatory circular.",
+            "regulatory_sections": [],
+            "info_sections": [],
+            "is_regulatory": False,
+        }
+
     paragraphs = text.split('\n\n')
     summary = "Mock summary of regulatory text."
     if paragraphs:
@@ -18,48 +48,37 @@ def mock_read_circular(text: str) -> dict:
         "reference": "RBI/2026/01",
         "summary": summary,
         "regulatory_sections": paragraphs[:5],
-        "info_sections": paragraphs[5:]
+        "info_sections": paragraphs[5:],
+        "is_regulatory": True,
     }
 
 def mock_extract_rules(sections: list) -> list:
-    return [
-        {
-            "rule_id": "R-001",
-            "title": "Mandatory VAPT Assessment for Core Banking Systems",
-            "description": "All scheduled commercial banks shall conduct Vulnerability Assessment and Penetration Testing (VAPT) of their core banking systems, internet banking platforms, and mobile banking applications at least once every six months.",
-            "affected_departments": ["Cybersecurity Wing", "IT Vertical"],
-            "deadline": (date.today() + timedelta(days=90)).isoformat(),
-            "priority": "High",
-            "estimated_effort_days": 21
-        },
-        {
-            "rule_id": "R-002",
-            "title": "Enhanced Customer Due Diligence for High-Risk Accounts",
-            "description": "Banks shall implement enhanced due diligence procedures for accounts classified as high-risk under the risk-based approach. This includes periodic review of KYC documents every 6 months.",
+    if not sections:
+        return []
+
+    rules = []
+    # Generate up to 4 dynamic rules based on the provided text sections
+    for i, section in enumerate(sections):
+        if i >= 4:
+            break
+            
+        words = section.split()
+        if len(words) < 5:
+            continue
+            
+        title = " ".join(words[:10]).title() + "..."
+        
+        rules.append({
+            "rule_id": f"R-MOCK-{len(section)}{i}",
+            "title": title,
+            "description": section[:250].strip() + ("..." if len(section) > 250 else ""),
             "affected_departments": ["Compliance Department", "Risk Management"],
             "deadline": (date.today() + timedelta(days=60)).isoformat(),
-            "priority": "High",
-            "estimated_effort_days": 30
-        },
-        {
-            "rule_id": "R-003",
-            "title": "Cyber Incident Reporting Framework",
-            "description": "All regulated entities must report cyber security incidents to RBI within 6 hours of detection. A detailed incident report must be submitted within 72 hours.",
-            "affected_departments": ["Cybersecurity Wing", "Risk Management"],
-            "deadline": (date.today() + timedelta(days=45)).isoformat(),
-            "priority": "Critical",
-            "estimated_effort_days": 45
-        },
-        {
-            "rule_id": "R-004",
-            "title": "Digital Lending Platform Security Requirements",
-            "description": "All banks offering digital lending services must implement end-to-end encryption for loan origination data, conduct quarterly security assessments of lending platforms.",
-            "affected_departments": ["Digital Banking Services", "Procurement & Vendor Management"],
-            "deadline": (date.today() + timedelta(days=90)).isoformat(),
-            "priority": "High",
-            "estimated_effort_days": 28
-        }
-    ]
+            "priority": "High" if i % 2 == 0 else "Medium",
+            "estimated_effort_days": 15 + (i * 5)
+        })
+        
+    return rules
 
 def mock_check_conflicts(new_rules: list, existing_rules: list) -> list:
     try:

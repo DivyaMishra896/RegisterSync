@@ -35,13 +35,32 @@ class OrchestratorAgent:
             "agent": "Reader",
             "thought": f"Identified {len(reader_result.get('regulatory_sections', []))} regulatory sections. Subject: {reader_result.get('subject', 'Unknown')}."
         }
+
+        # ── Relevance gate ──────────────────────────────────────────────────────
+        regulatory_sections = reader_result.get("regulatory_sections", [])
+        if not regulatory_sections:
+            yield {
+                "type": "thought",
+                "agent": "Orchestrator",
+                "thought": "Document does not appear to be a regulatory circular. No rules will be extracted."
+            }
+            yield {
+                "type": "non_regulatory",
+                "data": {"message": reader_result.get("summary", "Non-regulatory document.")}
+            }
+            yield {
+                "type": "final_result",
+                "data": {"rules": [], "conflicts": []}
+            }
+            return
+        # ────────────────────────────────────────────────────────────────────────
         
         yield {
             "type": "thought",
             "agent": "Extractor",
             "thought": "Extracting specific compliance rules, deadlines, and priorities..."
         }
-        rules = await self.extractor.extract(reader_result.get('regulatory_sections', []))
+        rules = await self.extractor.extract(regulatory_sections)
         
         yield {
             "type": "thought",

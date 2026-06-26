@@ -2,9 +2,19 @@ import axios from 'axios';
 
 export const API_BASE = 'http://localhost:8000/api';
 
+// Heavy client — for upload/extraction which can take minutes with Ollama
 const client = axios.create({
   baseURL: API_BASE,
-  timeout: 120000,
+  timeout: 300000, // 5 minutes for Ollama inference
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Fast client — for quick DB reads (tasks, stats, circulars, health)
+const fastClient = axios.create({
+  baseURL: API_BASE,
+  timeout: 15000, // 15 seconds max for simple queries
   headers: {
     'Content-Type': 'application/json',
   },
@@ -19,12 +29,12 @@ export const uploadCircular = (file, source = 'RBI') => {
   });
 };
 
-export const getCirculars = () => client.get('/upload/circulars');
-export const getCircular = (id) => client.get(`/upload/circulars/${id}`);
+export const getCirculars = () => fastClient.get('/upload/circulars');
+export const getCircular = (id) => fastClient.get(`/upload/circulars/${id}`);
 
 export const triggerExtraction = (circularId) => client.post(`/extract/${circularId}`);
-export const getRules = (circularId) => client.get(`/extract/${circularId}/rules`);
-export const getConflicts = (circularId) => client.get(`/extract/${circularId}/conflicts`);
+export const getRules = (circularId) => fastClient.get(`/extract/${circularId}/rules`);
+export const getConflicts = (circularId) => fastClient.get(`/extract/${circularId}/conflicts`);
 
 export const getTasks = (filters = {}) => {
   const params = new URLSearchParams();
@@ -32,17 +42,18 @@ export const getTasks = (filters = {}) => {
   if (filters.status) params.append('status', filters.status);
   if (filters.priority) params.append('priority', filters.priority);
   if (filters.circular_id) params.append('circular_id', filters.circular_id);
-  return client.get(`/tasks?${params.toString()}`);
+  return fastClient.get(`/tasks?${params.toString()}`);
 };
 
-export const getTaskStats = () => client.get('/tasks/stats');
-export const getTask = (id) => client.get(`/tasks/${id}`);
-export const updateTask = (id, updates) => client.patch(`/tasks/${id}`, updates);
+export const getTaskStats = () => fastClient.get('/tasks/stats');
+export const getTask = (id) => fastClient.get(`/tasks/${id}`);
+export const updateTask = (id, updates) => fastClient.patch(`/tasks/${id}`, updates);
 
 export const runVerification = () => client.post('/verify/run');
-export const getVerificationSummary = () => client.get('/verify/summary');
-export const getTaskVerification = (taskId) => client.get(`/verify/task/${taskId}`);
+export const getVerificationSummary = () => fastClient.get('/verify/summary');
+export const getTaskVerification = (taskId) => fastClient.get(`/verify/task/${taskId}`);
 
-export const healthCheck = () => client.get('/health');
+export const healthCheck = () => fastClient.get('/health');
 
 export default client;
+

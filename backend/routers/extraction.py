@@ -49,11 +49,29 @@ async def extract_rules_stream(circular_id: int):
                         "event": "thought",
                         "data": json.dumps({"agent": step["agent"], "thought": step["thought"]})
                     }
+                elif step["type"] == "non_regulatory":
+                    yield {
+                        "event": "non_regulatory",
+                        "data": json.dumps({"message": step["data"].get("message", "Non-regulatory document.")})
+                    }
                 elif step["type"] == "final_result":
                     final_data = step["data"]
 
-            rules_data = final_data.get("rules", [])
-            conflicts_data = final_data.get("conflicts", [])
+            rules_data = final_data.get("rules", []) if final_data else []
+            conflicts_data = final_data.get("conflicts", []) if final_data else []
+
+            if not rules_data:
+                circular.status = "processed"
+                db.commit()
+                yield {
+                    "event": "complete",
+                    "data": json.dumps({
+                        "rules_extracted": 0,
+                        "tasks_generated": 0,
+                        "conflicts_found": 0
+                    })
+                }
+                return
 
             saved_rules = []
             for rule_data in rules_data:

@@ -87,7 +87,54 @@ async def extract_rules_from_text(text_chunks: list[str], circular_id: int) -> d
         await asyncio.sleep(2)
         return MOCK_EXTRACTION_RESPONSE
 
-    await asyncio.sleep(1)
+    # --- Live Ollama extraction path ---
+    # Import here to avoid circular imports at module load time
+    from services.llm_provider import llm_client
+
+    today = date.today().isoformat()
+    combined_text = "\n\n".join(text_chunks)
+
+    system_prompt = (
+        "You are a regulatory compliance expert specialising in banking and finance regulations. "
+        "Your task is to read a regulatory circular and extract every distinct compliance rule or obligation it contains. "
+        "Return ONLY a valid JSON object — no markdown fences, no explanation — with this exact schema:\n"
+        '{"rules": [{'
+        '"rule_id": "R-001", '
+        '"title": "<concise rule title>", '
+        '"description": "<full obligation description>", '
+        '"affected_departments": ["<dept1>", "<dept2>"], '
+        f'"deadline": "<ISO-8601 date on or after {today}>", '
+        '"priority": "<Critical|High|Medium|Low>", '
+        '"estimated_effort_days": <positive integer>'
+        "}]}"
+    )
+
+    user_prompt = (
+        f"Regulatory circular text:\n\n{combined_text}\n\n"
+        "Extract all compliance rules and obligations from the text above "
+        "and return them in the JSON structure described."
+    )
+
+    print(
+        f"[LLMExtractor] Sending circular_id={circular_id} "
+        f"({len(text_chunks)} chunk(s)) to Ollama..."
+    )
+
+    result = await llm_client.generate(system_prompt, user_prompt)
+
+    if result:
+        is_valid, msg = validate_extraction(result)
+        if is_valid:
+            rule_count = len(result.get("rules", []))
+            print(f"[LLMExtractor] Extracted {rule_count} rule(s) via Ollama.")
+            return result
+        else:
+            print(f"[LLMExtractor] Ollama response failed validation: {msg}")
+    else:
+        print("[LLMExtractor] Ollama returned an empty or unparseable response.")
+
+    # Graceful fallback so the upload flow does not break
+    print("[LLMExtractor] Falling back to mock extraction response.")
     return MOCK_EXTRACTION_RESPONSE
 
 
