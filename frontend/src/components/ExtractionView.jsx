@@ -15,6 +15,45 @@ export default function ExtractionView({ circularId, isStreaming, onComplete }) 
   }, [logs]);
 
   useEffect(() => {
+    if (isStreaming || extractionData || !circularId) return;
+
+    const fetchSavedResults = async () => {
+      try {
+        setLogs([{ agent: 'System', thought: 'Loading previously extracted results...' }]);
+        const [rulesRes, conflictsRes, tasksRes] = await Promise.all([
+          getRules(circularId),
+          getConflicts(circularId),
+          getTasks({ circular_id: circularId }),
+        ]);
+
+        const rules = rulesRes.data.rules || [];
+        const conflicts = conflictsRes.data.conflicts || [];
+        const tasks = tasksRes.data.tasks || [];
+
+        if (rules.length === 0 && tasks.length === 0) {
+          setLogs(prev => [...prev, { agent: 'System', thought: 'No extraction data found for this circular.' }]);
+          return;
+        }
+
+        setExtractionData({
+          rules_extracted: rules.length,
+          tasks_generated: tasks.length,
+          conflicts_found: conflicts.length,
+          rules,
+          conflicts,
+          tasks,
+        });
+        setLogs(prev => [...prev, { agent: 'System', thought: 'Results loaded successfully.' }]);
+      } catch (err) {
+        console.error('Failed to load saved extraction results:', err);
+        setLogs(prev => [...prev, { agent: 'System', thought: 'Could not reload extraction results.' }]);
+      }
+    };
+
+    fetchSavedResults();
+  }, [circularId, isStreaming]);
+
+  useEffect(() => {
     if (!isStreaming) return;
 
     setLogs([{ agent: 'System', thought: 'Initializing Multi-Agent Orchestrator...' }]);
@@ -45,7 +84,7 @@ export default function ExtractionView({ circularId, isStreaming, onComplete }) 
 
     eventSource.addEventListener('complete', async (e) => {
       isFinished = true;
-      eventSource.close(); // Prevent reconnect
+      eventSource.close();
       
       try {
         const stats = JSON.parse(e.data);
@@ -72,7 +111,7 @@ export default function ExtractionView({ circularId, isStreaming, onComplete }) 
     });
 
     eventSource.addEventListener('error', (e) => {
-      if (isFinished) return; // Already finished
+      if (isFinished) return;
       
       let msg = 'SSE connection error (Server may have closed the connection)';
       if (e.data) msg = e.data;

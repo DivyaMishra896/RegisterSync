@@ -1,18 +1,45 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, Sparkles, ArrowRight } from 'lucide-react';
+import { Upload, Sparkles, ArrowRight, RotateCcw } from 'lucide-react';
 import UploadZone from '../components/UploadZone';
 import ExtractionView from '../components/ExtractionView';
 
+function loadSavedState() {
+  try {
+    const saved = localStorage.getItem('suraksha_extraction_state');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.circularId && parsed.step === 'done') {
+        return { circularId: parsed.circularId, step: 'done' };
+      }
+    }
+  } catch (e) { /* ignore */ }
+  return null;
+}
+
+function saveState(circularId, step) {
+  try {
+    localStorage.setItem('suraksha_extraction_state', JSON.stringify({ circularId, step }));
+  } catch (e) { /* ignore */ }
+}
+
+function clearSavedState() {
+  try {
+    localStorage.removeItem('suraksha_extraction_state');
+  } catch (e) { /* ignore */ }
+}
+
 export default function UploadPage() {
   const navigate = useNavigate();
-  const [circularId, setCircularId] = useState(null);
+  const saved = loadSavedState();
+  const [circularId, setCircularId] = useState(saved?.circularId || null);
   const [extracting, setExtracting] = useState(false);
-  const [step, setStep] = useState('upload');
+  const [step, setStep] = useState(saved?.step || 'upload');
 
   const handleUploadComplete = (data) => {
     setCircularId(data.circular_id);
     setStep('extract');
+    saveState(data.circular_id, 'extract');
   };
 
   const handleExtract = () => {
@@ -23,6 +50,14 @@ export default function UploadPage() {
   const handleExtractionComplete = () => {
     setStep('done');
     setExtracting(false);
+    saveState(circularId, 'done');
+  };
+
+  const handleStartNewUpload = () => {
+    clearSavedState();
+    setCircularId(null);
+    setExtracting(false);
+    setStep('upload');
   };
 
   return (
@@ -84,10 +119,14 @@ export default function UploadPage() {
         )}
 
         {step === 'done' && (
-          <div style={{ marginTop: '28px', textAlign: 'center' }}>
+          <div style={{ marginTop: '28px', textAlign: 'center', display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
             <button className="btn btn-primary btn-lg" onClick={() => navigate('/dashboard')}>
               <ArrowRight size={18} />
               View Compliance Dashboard
+            </button>
+            <button className="btn btn-outline btn-lg" onClick={handleStartNewUpload}>
+              <RotateCcw size={18} />
+              Start New Upload
             </button>
           </div>
         )}

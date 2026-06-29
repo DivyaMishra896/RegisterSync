@@ -5,10 +5,9 @@ try:
     from sklearn.feature_extraction.text import TfidfVectorizer
     from sklearn.metrics.pairwise import cosine_similarity
 except ImportError:
-    pass  # Fallback
+    pass
 
-# Keywords that strongly indicate a genuine regulatory/compliance document
-_REGULATORY_KEYWORDS = [
+REGULATORY_KEYWORDS = [
     "rbi", "sebi", "irdai", "nabard", "circular", "directive", "regulation",
     "compliance", "shall", "must", "mandatory", "prescribed", "guidelines",
     "banks", "banking", "financial institution", "regulated entity",
@@ -16,19 +15,17 @@ _REGULATORY_KEYWORDS = [
     "penalty", "enforcement", "deadline", "submit", "report to", "supervisory",
     "capital adequacy", "kyc", "aml", "fraud", "npa", "nbfc", "payment system",
 ]
-_MIN_KEYWORD_HITS = 3  # document must contain at least this many distinct keywords
+_MIN_KEYWORD_HITS = 3
 
 
 def is_regulatory_document(text: str) -> bool:
-    """Returns True only if the text looks like a genuine regulatory circular."""
     lower = text.lower()
-    hits = sum(1 for kw in _REGULATORY_KEYWORDS if kw in lower)
+    hits = sum(1 for kw in REGULATORY_KEYWORDS if kw in lower)
     return hits >= _MIN_KEYWORD_HITS
 
 
 def mock_read_circular(text: str) -> dict:
     if not is_regulatory_document(text):
-        # Return empty regulatory_sections so the pipeline produces zero rules
         return {
             "subject": "Non-Regulatory Document",
             "reference": "",
@@ -57,7 +54,6 @@ def mock_extract_rules(sections: list) -> list:
         return []
 
     rules = []
-    # Generate up to 4 dynamic rules based on the provided text sections
     for i, section in enumerate(sections):
         if i >= 4:
             break

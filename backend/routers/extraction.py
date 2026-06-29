@@ -32,37 +32,44 @@ async def extract_rules_stream(circular_id: int):
             circular.status = "extracting"
             db.commit()
 
-            chunks = chunk_text(circular.raw_text)
+            raw_text = circular.raw_text
+            chunks = chunk_text(raw_text)
 
             existing_rules_db = db.query(ExtractedRule).all()
             existing_rules = [
                 {"rule_id": r.rule_id, "title": r.title, "description": r.description} 
                 for r in existing_rules_db
             ]
+        finally:
+            db.close()
 
-            orchestrator = OrchestratorAgent()
-            final_data = None
+        orchestrator = OrchestratorAgent()
+        final_data = None
 
-            async for step in orchestrator.run_extraction_pipeline(chunks, circular_id, existing_rules):
-                if step["type"] == "thought":
-                    yield {
-                        "event": "thought",
-                        "data": json.dumps({"agent": step["agent"], "thought": step["thought"]})
-                    }
-                elif step["type"] == "non_regulatory":
-                    yield {
-                        "event": "non_regulatory",
-                        "data": json.dumps({"message": step["data"].get("message", "Non-regulatory document.")})
-                    }
-                elif step["type"] == "final_result":
-                    final_data = step["data"]
+        async for step in orchestrator.run_extraction_pipeline(chunks, circular_id, existing_rules):
+            if step["type"] == "thought":
+                yield {
+                    "event": "thought",
+                    "data": json.dumps({"agent": step["agent"], "thought": step["thought"]})
+                }
+            elif step["type"] == "non_regulatory":
+                yield {
+                    "event": "non_regulatory",
+                    "data": json.dumps({"message": step["data"].get("message", "Non-regulatory document.")})
+                }
+            elif step["type"] == "final_result":
+                final_data = step["data"]
 
-            rules_data = final_data.get("rules", []) if final_data else []
-            conflicts_data = final_data.get("conflicts", []) if final_data else []
+        rules_data = final_data.get("rules", []) if final_data else []
+        conflicts_data = final_data.get("conflicts", []) if final_data else []
 
+        db = SessionLocal()
+        try:
             if not rules_data:
-                circular.status = "processed"
-                db.commit()
+                circular = db.query(Circular).filter(Circular.id == circular_id).first()
+                if circular:
+                    circular.status = "processed"
+                    db.commit()
                 yield {
                     "event": "complete",
                     "data": json.dumps({
@@ -115,8 +122,10 @@ async def extract_rules_stream(circular_id: int):
 
             tasks = generate_maps_from_rules(db, circular_id, saved_rules)
 
-            circular.status = "processed"
-            db.commit()
+            circular = db.query(Circular).filter(Circular.id == circular_id).first()
+            if circular:
+                circular.status = "processed"
+                db.commit()
 
             yield {
                 "event": "complete",
@@ -128,7 +137,7 @@ async def extract_rules_stream(circular_id: int):
             }
 
         except Exception as e:
-            print(f"Streaming error: {e}")
+            print(f"Streaming error (write phase): {e}")
             yield {"event": "error", "data": str(e)}
         finally:
             db.close()
@@ -158,3 +167,29 @@ async def get_conflicts(circular_id: int, db: Session = Depends(get_db)):
             conflicts.extend(conflict_data)
 
     return {"conflicts": conflicts}
+
+
+@router.post("/{circular_id}/regenerate-tasks")
+async def regenerate_tasks(circular_id: int, db: Session = Depends(get_db)):
+    """Regenerate MAP tasks from existing rules when task creation previously failed."""
+    rules = db.query(ExtractedRule).filter(
+        ExtractedRule.circular_id == circular_id
+    ).all()
+
+    if not rules:
+        raise HTTPException(status_code=404, detail="No rules found for this circular")
+
+    db.query(MAPTask).filter(MAPTask.circular_id == circular_id).delete()
+    db.commit()
+
+    tasks = generate_maps_from_rules(db, circular_id, rules)
+
+    circular = db.query(Circular).filter(Circular.id == circular_id).first()
+    if circular:
+        circular.status = "processed"
+        db.commit()
+
+    return {
+        "message": f"Regenerated {len(tasks)} tasks from {len(rules)} rules",
+        "tasks_generated": len(tasks),
+    }

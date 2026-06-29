@@ -87,9 +87,7 @@ async def extract_rules_from_text(text_chunks: list[str], circular_id: int) -> d
         await asyncio.sleep(2)
         return MOCK_EXTRACTION_RESPONSE
 
-    # --- Live Ollama extraction path ---
-    # Import here to avoid circular imports at module load time
-    from services.llm_provider import llm_client
+    from .department_router import CircularAssigner
 
     today = date.today().isoformat()
     combined_text = "\n\n".join(text_chunks)
@@ -115,26 +113,20 @@ async def extract_rules_from_text(text_chunks: list[str], circular_id: int) -> d
         "and return them in the JSON structure described."
     )
 
-    print(
-        f"[LLMExtractor] Sending circular_id={circular_id} "
-        f"({len(text_chunks)} chunk(s)) to Ollama..."
-    )
+    try:
+        from services.llm_provider import llm_client
+        result = await llm_client.generate(system_prompt, user_prompt)
+        if result:
+            is_valid, msg = validate_extraction(result)
+            if is_valid:
+                return result
+            else:
+                print(f"[LLMExtractor] Ollama response failed validation: {msg}")
+    except Exception as e:
+        print(f"[Ollama] Connection error: {e}")
+        from .nlp_fallback import fallback_extract_rules
+        return fallback_extract_rules(combined_text)
 
-    result = await llm_client.generate(system_prompt, user_prompt)
-
-    if result:
-        is_valid, msg = validate_extraction(result)
-        if is_valid:
-            rule_count = len(result.get("rules", []))
-            print(f"[LLMExtractor] Extracted {rule_count} rule(s) via Ollama.")
-            return result
-        else:
-            print(f"[LLMExtractor] Ollama response failed validation: {msg}")
-    else:
-        print("[LLMExtractor] Ollama returned an empty or unparseable response.")
-
-    # Graceful fallback so the upload flow does not break
-    print("[LLMExtractor] Falling back to mock extraction response.")
     return MOCK_EXTRACTION_RESPONSE
 
 

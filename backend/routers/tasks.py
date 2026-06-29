@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 
 from database import get_db
@@ -33,7 +33,7 @@ async def list_tasks(
 
 @router.get("/stats")
 async def get_task_stats(db: Session = Depends(get_db)):
-    all_tasks = db.query(MAPTask).all()
+    all_tasks = db.query(MAPTask).options(joinedload(MAPTask.rule)).all()
 
     if not all_tasks:
         return {

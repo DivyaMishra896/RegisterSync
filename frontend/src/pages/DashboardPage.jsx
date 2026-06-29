@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, RefreshCw, TrendingUp, Clock, CheckCircle, XCircle, Shield, AlertTriangle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { LayoutDashboard, RefreshCw, TrendingUp, Clock, CheckCircle, XCircle, Shield, AlertTriangle, ArrowLeft } from 'lucide-react';
 import TaskBoard from '../components/TaskBoard';
 import VerificationPanel from '../components/VerificationPanel';
 import ImpactPredictor from '../components/ImpactPredictor';
 import { getTasks, getTaskStats } from '../api/client';
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -15,12 +17,20 @@ export default function DashboardPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [tasksRes, statsRes] = await Promise.all([
+      const [tasksResult, statsResult] = await Promise.allSettled([
         getTasks(),
         getTaskStats(),
       ]);
-      setTasks(tasksRes.data.tasks || []);
-      setStats(statsRes.data);
+      if (tasksResult.status === 'fulfilled') {
+        setTasks(tasksResult.value.data.tasks || []);
+      } else {
+        console.error('Failed to fetch tasks:', tasksResult.reason);
+      }
+      if (statsResult.status === 'fulfilled') {
+        setStats(statsResult.value.data);
+      } else {
+        console.error('Failed to fetch stats:', statsResult.reason);
+      }
     } catch (err) {
       console.error('Failed to fetch dashboard data:', err);
     } finally {
@@ -121,10 +131,16 @@ export default function DashboardPage() {
           </div>
           <div className="page-subtitle">Monitor and verify regulatory compliance tasks</div>
         </div>
-        <button className="btn btn-outline btn-sm" onClick={fetchData}>
-          <RefreshCw size={14} />
-          Refresh
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button className="btn btn-outline btn-sm" onClick={() => navigate('/upload')}>
+            <ArrowLeft size={14} />
+            Back to Summary
+          </button>
+          <button className="btn btn-outline btn-sm" onClick={fetchData}>
+            <RefreshCw size={14} />
+            Refresh
+          </button>
+        </div>
       </div>
 
       <div className="page-content">

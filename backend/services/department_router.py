@@ -8,11 +8,9 @@ from services.department_data import (
     match_sub_vertical,
 )
 
-# Threshold
-RELEVANCE_THRESHOLD = 1
+_ROUTING_THRESHOLD = 0.21
 
-# State file
-STATE_FILE = Path(__file__).parent.parent / "assignment_state.json"
+_STATE_FILE = Path(__file__).parent.parent / "assignment_state.json"
 
 
 class CircularAssigner:
@@ -24,8 +22,8 @@ class CircularAssigner:
         if cls._initialized:
             return
         try:
-            if STATE_FILE.exists():
-                with open(STATE_FILE, "r") as f:
+            if _STATE_FILE.exists():
+                with open(_STATE_FILE, "r") as f:
                     data = json.load(f)
                     cls._index = data.get("index", 0)
         except Exception:
@@ -35,7 +33,7 @@ class CircularAssigner:
     @classmethod
     def _save_state(cls):
         try:
-            with open(STATE_FILE, "w") as f:
+            with open(_STATE_FILE, "w") as f:
                 json.dump({"index": cls._index}, f)
         except Exception:
             pass
@@ -53,7 +51,7 @@ class CircularAssigner:
 
         relevant = [
             dept for dept, score in scores.items()
-            if score >= RELEVANCE_THRESHOLD
+            if score >= _ROUTING_THRESHOLD
         ]
 
         pool = relevant if relevant else DEPARTMENT_NAMES
